@@ -1,14 +1,20 @@
+#Format:
+#** <obj_name>
+#** <obj_pattern filename>
+#** <marker_width>
+#** <centerX centerY>
+
 #the number of patterns to be recognized
 2
 
 #pattern 1
 Hiro
 Data/patt.hiro
-80.0
+80
 0,0 0,0
 
 #pattern 2
 Kanji
 Data/patt.kanji
-80.0
+80
 0,0 0,0

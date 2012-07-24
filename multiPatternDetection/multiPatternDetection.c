@@ -8,6 +8,7 @@
 #include <AR/ar.h>
 #include <AR/video.h>
 #include "object.h"
+#include "multiPatternDetection.h"
 
 /* Object Data */
 char            *model_name = "Data/object_data2";
@@ -26,43 +27,17 @@ char			*vconf = "";
 char           *cparam_name    = "Data/camera_para.dat";
 ARParam         cparam;
 
-static void   init(void);
-static void   cleanup(void);
-static void   mainLoop(void);
-
-int main(int argc, char **argv)
-{
-  //initialize applications
-  init();
-  printf("PASO Init\n");
-  arVideoCapStart();
-  char c;
-
-  while (1)
-    {
-      c = getchar();
-      if(c== 'x')
-        {
-          cleanup();
-          exit(0);
-        }
-      mainLoop();
-
-    }
-
-  return 0;
-}
-
-
-
-/* main loop */
-static void mainLoop(void)
+/* refresh */
+void arMultiRefresh(void)
 {
   ARUint8         *dataPtr;
   ARMarkerInfo    *marker_info;
   int             marker_num;
   int             i,j,k;
-
+  arVideoCapNext();
+  arVideoCapNext();
+  arVideoCapNext();
+   
   /* grab a video frame */
   if( (dataPtr = (ARUint8 *)arVideoGetImage()) == NULL )
     {
@@ -78,7 +53,7 @@ static void mainLoop(void)
   if(arDetectMarker(dataPtr, thresh,
                     &marker_info, &marker_num) < 0 )
     {
-      cleanup();
+      arMultiCleanup();
       exit(0);
     }
   if (marker_num > 0)
@@ -137,16 +112,15 @@ static void mainLoop(void)
       printf("Data : %f %f %f\n", object[i].trans[0][3], object[i].trans[1][3], object[i].trans[2][3]);
     }
 
-  arVideoCapNext();
-
-  if(objectnum != 2)
-    {
-      // printf("%d\n",objectnum);
-    }
+  
 }
 
+ObjectData_T  *arMultiGetObjectData( char *name ){
+  //TODO
+  return 0;
+}  
 
-static void init( void )
+void arMultiInit( void )
 {
   ARParam  wparam;
 
@@ -178,7 +152,7 @@ static void init( void )
 
 
 /* cleanup function called when program exits */
-static void cleanup(void)
+void arMultiCleanup(void)
 {
   arVideoCapStop();
   arVideoClose();

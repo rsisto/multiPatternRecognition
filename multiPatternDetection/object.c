@@ -6,10 +6,7 @@
 ** Format:
 ** <obj_num>
 **
-** <obj_name>
-** <obj_pattern filename>
-** <marker_width>
-** <centerX centerY>
+
 **
 ** ...
 **
@@ -76,7 +73,6 @@ ObjectData_T *read_ObjData( char *name, int *objectnum )
       printf("%s \n",  object[i].name);
 
       get_buff(buf, 256, fp);
-      printf("paso \n");
       if( sscanf(buf, "%s", buf1) != 1 )
         {
           printf("1 \n");

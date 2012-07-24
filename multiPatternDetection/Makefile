@@ -6,13 +6,16 @@ LIBS= -lARgsub -lARvideo -lAR -lpthread -lglut -lGLU -lGL -lXi -lX11 -lm -pthrea
 CFLAG= -O -pthread -I/usr/include/gstreamer-0.10 -I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include -I/usr/include/libxml2 -I/usr/X11R6/include -I$(INC_DIR)
 
 
-OBJS = object.o
-HEADDERS = object.h
+OBJS = multiPatternDetection.o object.o 
+HEADDERS = object.h multiPatternDetection.h
 
-all: multiPatternDetection
+all: multiPatternTest
 
-multiPatternDetection: multiPatternDetection.o $(OBJS)
-	cc -o multiPatternDetection multiPatternDetection.o $(OBJS) $(LDFLAG) $(LIBS)
+multiPatternTest: multiPatternTest.o $(OBJS)
+	cc -o multiPatternTest multiPatternTest.o $(OBJS) $(LDFLAG) $(LIBS)
+
+multiPatternTest.o: multiPatternTest.c $(HEADDERS)
+	cc -c $(CFLAG) multiPatternTest.c
 
 multiPatternDetection.o: multiPatternDetection.c $(HEADDERS)
 	cc -c $(CFLAG) multiPatternDetection.c
@@ -23,8 +26,7 @@ object.o: object.c $(HEADDERS)
 clean:
 	rm -f *.o
 	rm -f multiPatternDetection
+	rm -f multiPatternTest
 
-allclean:
-	rm -f *.o
-	rm -f multiPatternDetection
-	rm -f Makefile
+
+	
