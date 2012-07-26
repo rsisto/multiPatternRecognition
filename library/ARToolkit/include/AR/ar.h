@@ -164,7 +164,7 @@ typedef struct {
 * \param x_coord x coordinate of the pixels of contours (size limited by AR_CHAIN_MAX).
 * \param y_coord y coordinate of the pixels of contours (size limited by AR_CHAIN_MAX).
 * \param vertex position of the vertices of the marker. (in observed screen coordinates)
-		 rem:the first vertex is stored again as the 5th entry in the array – for convenience of drawing a line-strip easier.
+		 rem:the first vertex is stored again as the 5th entry in the array ï¿½ for convenience of drawing a line-strip easier.
 * 
 */
 typedef struct {
@@ -334,7 +334,7 @@ int arInitCparam( ARParam *param );
 * load the bitmap pattern specified in the file filename into the pattern
 * matching array for later use by the marker detection routines.
 * \param filename name of the file containing the pattern bitmap to be loaded
-* \return the identity number of the pattern loaded or –1 if the pattern load failed.
+* \return the identity number of the pattern loaded or ï¿½1 if the pattern load failed.
 */
 int arLoadPatt( const char *filename );
 
@@ -632,6 +632,17 @@ ARMarkerInfo *arGetMarkerInfo( ARUint8 *image,
                                ARMarkerInfo2 *marker_info2, int *marker_num );
 
 /**
+* \brief information on
+*
+*  XXXBK
+* \param image XXXBK
+* \param marker_info2 XXXBK
+* \param marker_num XXXBK
+* \return XXXBK
+*/
+ARMarkerInfo *arGetColorElementInfo( ARUint8 *image,
+                               ARMarkerInfo2 *marker_info2, int *marker_num, int *clip);
+/**
 * \brief  XXXBK
 *
 *  XXXBK
@@ -808,6 +819,40 @@ int           arsCheckMarkerPosition( ARMarkerInfo *marker_infoL, ARMarkerInfo *
 double arsModifyMatrix( double rot[3][3], double trans[3], ARSParam *arsParam,
                         double pos3dL[][3], double pos2dL[][2], int numL,
                         double pos3dR[][3], double pos2dR[][2], int numR );
+
+
+		//-- AGREGADOS PARA DETECCION DE COLORES
+
+ARMarkerInfo2 *arDetectMarker3( ARInt16 *limage, int label_num, int *label_ref, int *warea,
+							double *wpos, int *wclip, int area_max, int area_min, int *marker_num );
+
+ARInt16 *arLabelingHSB( ARUint8 *image, int *label_num, int **area, double **pos,
+					int **clip,int **label_ref, int LorR, int minH, int maxH, int minS,
+					int maxS, int minB, int maxB, int invert);
+
+ARInt16 *arLabelingHSB2( unsigned char *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int maxB, int invert);
+
+ARInt16 *arLabelingHSB3( unsigned char *imgCV,int widthStep,int nChannels,ARUint8 *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int maxB, int invert);
+
+ARInt16 *arLabelingHSBMultiple( ARUint8 *image, int thresh, int *label_num, int **area,	double **pos,
+						int **clip,int **label_ref, int LorR, int *minH,int *maxH, int *minS,
+						int *maxS, int *minB,int *maxB, int numHSV, int invert);
+
+ARInt16 *arLabelingHSBFixedArea( ARUint8 *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int
+					maxB, int invert,int xsize,int ysize);
+
+void RGBtoHSV(double r, double g, double b, double *H, double *S, double *V);
+
+void HSVtoRGB(double h, double s, double v, double *R, double *G, double *B);
+
+int arUtilGetSubImage(ARUint8 * imageSource,ARUint8 * imageDest, int xsize, int ysize, int xIni, int yIni);
+
 
 #ifdef __cplusplus
 }

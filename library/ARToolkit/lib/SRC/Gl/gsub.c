@@ -340,7 +340,7 @@ void argDraw3dCamera( int xwin, int ywin )
     }
 
     argSetStencil( 0 );
-    
+
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixd( gl_cpara );
 }
@@ -423,7 +423,7 @@ static void argDispImageDrawPixels( ARUint8 *image, int xwin, int ywin )
     glDrawPixels( gImXsize, gImYsize, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image );
 #  else
     glDrawPixels( gImXsize, gImYsize, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_ABGR)
     glDrawPixels( gImXsize, gImYsize, GL_ABGR, GL_UNSIGNED_BYTE, image );
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_BGRA)
@@ -441,13 +441,13 @@ static void argDispImageDrawPixels( ARUint8 *image, int xwin, int ywin )
     glDrawPixels( gImXsize, gImYsize, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE, image );
 #  else
     glDrawPixels( gImXsize, gImYsize, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_yuvs)
 #  ifdef AR_BIG_ENDIAN
 	glDrawPixels( gImXsize, gImYsize, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
 #  else
 	glDrawPixels( gImXsize, gImYsize, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE, image );
-#  endif	
+#  endif
 #else
 #  error Unknown default pixel format defined in config.h
 #endif
@@ -513,7 +513,7 @@ static void argDispImageTexRectangle( ARUint8 *image, int xwin, int ywin, int mo
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image );
 #  else
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_ABGR)
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_ABGR, GL_UNSIGNED_BYTE, image );
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_BGRA)
@@ -531,13 +531,13 @@ static void argDispImageTexRectangle( ARUint8 *image, int xwin, int ywin, int mo
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE, image );
 #  else
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_yuvs)
 #  ifdef AR_BIG_ENDIAN
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
 #  else
         glTexSubImage2D( AR_TEXTURE_RECTANGLE, 0, 0, 0, gImXsize, gImYsize/size_adjust_factor, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_REV_8_8_APPLE, image );
-#  endif	
+#  endif
 #else
 #  error Unknown default pixel format defined in config.h
 #endif
@@ -548,7 +548,7 @@ static void argDispImageTexRectangle( ARUint8 *image, int xwin, int ywin, int mo
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGBA, gImXsize, gImYsize/size_adjust_factor, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, image );
 #  else
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGBA, gImXsize, gImYsize/size_adjust_factor, 0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_ABGR)
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGBA, gImXsize, gImYsize/size_adjust_factor, 0, GL_ABGR, GL_UNSIGNED_BYTE, image );
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_BGRA)
@@ -566,13 +566,13 @@ static void argDispImageTexRectangle( ARUint8 *image, int xwin, int ywin, int mo
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGB, gImXsize, gImYsize/size_adjust_factor, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE, image );
 #  else
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGB, gImXsize, gImYsize/size_adjust_factor, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
-#  endif	
+#  endif
 #elif (AR_DEFAULT_PIXEL_FORMAT == AR_PIXEL_FORMAT_yuvs)
 #  ifdef AR_BIG_ENDIAN
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGB, gImXsize, gImYsize/size_adjust_factor, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_APPLE, image );
 #  else
         glTexImage2D( AR_TEXTURE_RECTANGLE, 0, GL_RGB, gImXsize, gImYsize/size_adjust_factor, 0, GL_YCBCR_422_APPLE, GL_UNSIGNED_SHORT_8_8_REV_APPLE, image );
-#  endif	
+#  endif
 #else
 #  error Unknown default pixel format defined in config.h
 #endif
@@ -1567,6 +1567,69 @@ void argLineSeg( double x1, double y1, double x2, double y2, int xwin, int ywin 
     glFlush();
 }
 
+void argCleanWindow(int xwin, int ywin){
+	float   ox, oy;
+	double  xx1, yy1, xx2, yy2;
+
+	ox = (xwin-1)*gMiniXsize;
+	oy = gWinYsize - gYsize -(ywin-1)*gMiniYsize - 1;
+
+
+	if( xwin == 0 && ywin == 0 ) {
+		glScissor(0, gWinYsize-(int)(gZoom*gImYsize),
+				  (int)(gZoom*gImXsize), (int)(gZoom*gImYsize));
+	}
+	else {
+		glScissor((xwin-1)*gMiniXsize, gWinYsize-gYsize-ywin*gMiniYsize,
+				   gMiniXsize, gMiniYsize);
+	}
+	glEnable( GL_SCISSOR_TEST );
+
+	glClearColor( 0.0, 0.0, 0.0, 0.0 );
+	//glClearDepth( 1.0 );
+	glClear(GL_COLOR_BUFFER_BIT);
+
+	glDisable( GL_SCISSOR_TEST );
+}
+
+
+
+void argLineZoomSeg( double x1, double y1, double x2, double y2, int xwin, int ywin,double zoom,int xOffset,int yOffset )
+{
+    float   ox, oy;
+    double  xx1, yy1, xx2, yy2;
+
+    if( argDrawMode == AR_DRAW_BY_TEXTURE_MAPPING ) {
+        xx1 = x1;  yy1 = y1;
+        xx2 = x2;  yy2 = y2;
+    }
+    else {
+        arParamIdeal2Observ( gCparam.dist_factor, x1, y1, &xx1, &yy1 );
+        arParamIdeal2Observ( gCparam.dist_factor, x2, y2, &xx2, &yy2 );
+    }
+
+    xx1 *= zoom; yy1 *= zoom;
+    xx2 *= zoom; yy2 *= zoom;
+
+    if( xwin == 0 && ywin == 0 ) {
+        ox = 0;
+        oy = gWinYsize-1;
+        glBegin(GL_LINES);
+          glVertex2f( ox+xx1, oy-yy1 );
+          glVertex2f( ox+xx2, oy-yy2 );
+        glEnd();
+    }
+    else {
+        ox = (xwin-1)*gMiniXsize + xOffset;
+        oy = gWinYsize - gYsize -(ywin-1)*gMiniYsize - 1 - yOffset;
+        glBegin(GL_LINES);
+          glVertex2f( ox+xx1/GMINI, oy-yy1/GMINI );
+          glVertex2f( ox+xx2/GMINI, oy-yy2/GMINI );
+        glEnd();
+    }
+
+    glFlush();
+}
 void argLineSegHMD( double x1, double y1, double x2, double y2 )
 {
     float   ox, oy;

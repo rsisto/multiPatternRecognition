@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <AR/ar.h>
+#include <formatopixel.h>
 
 #ifdef _WIN32
 #  include <windows.h>
@@ -784,4 +785,1615 @@ void arLabelingCleanup(void)
 		free (arImageR);
 		arImageR = NULL;
 	}
+}
+
+
+
+		//-- AGREGADOS PARA DETECCION DE COLORES
+
+ARInt16 *arLabelingHSB( ARUint8 *image,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int
+maxB, int invert)
+{
+   ARUint8 *pnt;                    /* image pointer      */
+   ARInt16 *pnt1, *pnt2;               /* image pointer      */
+   int      *wk;                 /* pointer for work */
+   int      wk_max;                /* work            */
+   int      m,n;                /* work            */
+   int      i,j,k;             /* for loop        */
+   int      lxsize, lysize;
+   int      poff;
+   ARInt16 *l_image;
+   int      *work, *work2;
+   int      *wlabel_num;
+   int      *warea;
+   int      *wclip;
+   double *wpos;
+         double H, S, V;
+#ifdef USE_OPTIMIZATIONS
+         int                pnt2_index; // [tp]
+#endif
+         if( LorR ) {
+      l_image = &l_imageL[0];
+      work = &workL[0];
+      work2 = &work2L[0];
+      wlabel_num = &wlabel_numL;
+      warea = &wareaL[0];
+      wclip = &wclipL[0];
+      wpos = &wposL[0];
+   }
+   else {
+      l_image = &l_imageR[0];
+      work = &workR[0];
+      work2 = &work2R[0];
+      wlabel_num = &wlabel_numR;
+      warea = &wareaR[0];
+      wclip = &wclipR[0];
+      wpos = &wposR[0];
+   }
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      lxsize = arImXsize / 2;
+      lysize = arImYsize / 2;
+   }
+   else {
+      lxsize = arImXsize;
+      lysize = arImYsize;
+   }
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[(lysize-1)*lxsize];
+#ifndef USE_OPTIMIZATIONS
+         for(i = 0; i < lxsize; i++) {
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#else
+// 4x loop unrolling
+         for(i = 0; i < lxsize-(lxsize%4); i+=4) {
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#endif
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[lxsize-1];
+#ifndef USE_OPTIMIZATIONS
+   for(i = 0; i < lysize; i++) {
+      *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#else
+// 4x loop unrolling
+   for(i = 0; i < lysize-(lysize%4); i+=4) {
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#endif
+   wk_max = 0;
+   pnt2 = &(l_image[lxsize+1]);
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      pnt = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT*2;
+   }
+   else {
+      pnt = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT;
+   }
+   for(j = 1; j < lysize-1; j++, pnt+=poff*2, pnt2+=2) {
+      for(i = 1; i < lxsize-1; i++, pnt+=poff, pnt2++) {
+ RGBtoHSV(R_COMP,G_COMP,B_COMP,&H,&S,&V);
+ if((((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB))
+&& !invert) || (!((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB &&
+V<=maxB)) && invert)) {
+            pnt1 = &(pnt2[-lxsize]);
+            if( *pnt1 > 0 ) {
+               *pnt2 = *pnt1;
+#ifndef USE_OPTIMIZATIONS
+                                        // ORIGINAL CODE
+                                        work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                        // OPTIMIZED CODE [tp]
+                                        // ((*pnt2)-1)*7 should be treated as constant, since
+                                        // work2[n] (n=0..xsize*ysize) cannot overwrite (*pnt2)
+                                        pnt2_index = ((*pnt2)-1) * 7;
+               work2[pnt2_index+0]++;
+               work2[pnt2_index+1]+= i;
+               work2[pnt2_index+2]+= j;
+               work2[pnt2_index+6] = j;
+                                        // --------------------------------
+#endif
+         }
+         else if( *(pnt1+1) > 0 ) {
+            if( *(pnt1-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt1-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+                                             work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt2-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+#endif
+            }
+            else {
+               *pnt2 = *(pnt1+1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+3] > i ) work2[((*pnt2)-1)*7+3] = i;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+3] > i ) work2[pnt2_index+3] = i;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+         }
+         else if( *(pnt1-1) > 0 ) {
+            *pnt2 = *(pnt1-1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+            work2[((*pnt2)-1)*7+6] = j;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+                                      work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0) {
+               *pnt2 = *(pnt2-1);
+#ifndef USE_OPTIMIZATIONS
+                                               // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+#endif
+                                 }
+            else {
+               wk_max++;
+               if( wk_max > WORK_SIZE ) {
+                  return(0);
+               }
+               work[wk_max-1] = *pnt2 = wk_max;
+               work2[(wk_max-1)*7+0] = 1;
+               work2[(wk_max-1)*7+1] = i;
+               work2[(wk_max-1)*7+2] = j;
+               work2[(wk_max-1)*7+3] = i;
+               work2[(wk_max-1)*7+4] = i;
+               work2[(wk_max-1)*7+5] = j;
+               work2[(wk_max-1)*7+6] = j;
+            }
+         }
+         else {
+            *pnt2 = 0;
+         }
+      }
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) pnt +=
+arImXsize*AR_PIX_SIZE_DEFAULT;
+   }
+   j = 1;
+   wk = &(work[0]);
+   for(i = 1; i <= wk_max; i++, wk++) {
+      *wk = (*wk==i)? j++: work[(*wk)-1];
+   }
+   *label_num = *wlabel_num = j - 1;
+   if( *label_num == 0 ) {
+      return( l_image );
+   }
+   put_zero( (ARUint8 *)warea, *label_num * sizeof(int) );
+   put_zero( (ARUint8 *)wpos, *label_num * 2 * sizeof(double) );
+   for(i = 0; i < *label_num; i++) {
+      wclip[i*4+0] = lxsize;
+      wclip[i*4+1] = 0;
+      wclip[i*4+2] = lysize;
+      wclip[i*4+3] = 0;
+   }
+   for(i = 0; i < wk_max; i++) {
+      j = work[i] - 1;
+      warea[j] += work2[i*7+0];
+      wpos[j*2+0] += work2[i*7+1];
+      wpos[j*2+1] += work2[i*7+2];
+      if( wclip[j*4+0] > work2[i*7+3] ) wclip[j*4+0] = work2[i*7+3];
+      if( wclip[j*4+1] < work2[i*7+4] ) wclip[j*4+1] = work2[i*7+4];
+      if( wclip[j*4+2] > work2[i*7+5] ) wclip[j*4+2] = work2[i*7+5];
+      if( wclip[j*4+3] < work2[i*7+6] ) wclip[j*4+3] = work2[i*7+6];
+   }
+   for( i = 0; i < *label_num; i++ ) {
+      wpos[i*2+0] /= warea[i];
+      wpos[i*2+1] /= warea[i];
+   }
+   *label_ref = work;
+   *area      = warea;
+   *pos       = wpos;
+   *clip      = wclip;
+   return( l_image );
+}
+
+
+
+
+
+ARInt16 *arLabelingHSB3( unsigned char *imgCV,int widthStep,int nChannels,ARUint8 *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int maxB, int invert)
+{
+   ARUint8 *pnt;                    /* image pointer      */
+   ARInt16 *pnt1, *pnt2;               /* image pointer      */
+   int      *wk;                 /* pointer for work */
+   int      wk_max;                /* work            */
+   int      m,n;                /* work            */
+   int      i,j,k;             /* for loop        */
+   int      lxsize, lysize;
+   int      poff;
+   ARInt16 *l_image;
+   int      *work, *work2;
+   int      *wlabel_num;
+   int      *warea;
+   int      *wclip;
+   double *wpos;
+         double H, S, V;
+#ifdef USE_OPTIMIZATIONS
+         int                pnt2_index; // [tp]
+#endif
+         if( LorR ) {
+      l_image = &l_imageL[0];
+      work = &workL[0];
+      work2 = &work2L[0];
+      wlabel_num = &wlabel_numL;
+      warea = &wareaL[0];
+      wclip = &wclipL[0];
+      wpos = &wposL[0];
+   }
+   else {
+      l_image = &l_imageR[0];
+      work = &workR[0];
+      work2 = &work2R[0];
+      wlabel_num = &wlabel_numR;
+      warea = &wareaR[0];
+      wclip = &wclipR[0];
+      wpos = &wposR[0];
+   }
+   thresh *= 3;
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      lxsize = arImXsize / 2;
+      lysize = arImYsize / 2;
+   }
+   else {
+      lxsize = arImXsize;
+      lysize = arImYsize;
+   }
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[(lysize-1)*lxsize];
+#ifndef USE_OPTIMIZATIONS
+         for(i = 0; i < lxsize; i++) {
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#else
+// 4x loop unrolling
+         for(i = 0; i < lxsize-(lxsize%4); i+=4) {
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#endif
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[lxsize-1];
+#ifndef USE_OPTIMIZATIONS
+   for(i = 0; i < lysize; i++) {
+      *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#else
+// 4x loop unrolling
+   for(i = 0; i < lysize-(lysize%4); i+=4) {
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#endif
+   wk_max = 0;
+   pnt2 = &(l_image[lxsize+1]);
+   ARUint8* pntdata;
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      pnt = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT*2;
+      pntdata = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+   }
+   else {
+      pnt = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT;
+      pntdata = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+   }
+
+  // int step = widthStep/sizeof(unsigned char);
+   for(j = 1; j < lysize-1; j++, pnt+=poff*2,pntdata+=poff*2, pnt2+=2) {
+	   printf("\n");
+      for(i = 1; i < lxsize-1; i++, pnt+=poff,pntdata+=poff, pnt2++) {
+    	  double Hd = *pntdata;//imgCV[(j)*step+(i)*nChannels];
+    	  double Sd = *(pntdata+1);//imgCV[(j)*step+(i)*nChannels +1];
+    	  double Vd = *(pntdata+2);//imgCV[(j)*step+(i)*nChannels +2];
+
+    	  /*H = R_COMP;
+    	  S = G_COMP;
+    	  V = B_COMP;*/
+    	  RGBtoHSV(R_COMP,G_COMP,B_COMP,&H,&S,&V);
+
+    	//  printf("Directos:  (%f,%f,%f)  -- ",Hd,Sd,Vd);
+    	//  printf("Calculados:  (%f,%f,%f)\n",H,S,V);
+ if((((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB))
+&& !invert) || (!((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB)) && invert)) {
+            pnt1 = &(pnt2[-lxsize]);
+            if( *pnt1 > 0 ) {
+               *pnt2 = *pnt1;
+#ifndef USE_OPTIMIZATIONS
+                                        // ORIGINAL CODE
+                                        work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                        // OPTIMIZED CODE [tp]
+                                        // ((*pnt2)-1)*7 should be treated as constant, since
+                                        // work2[n] (n=0..xsize*ysize) cannot overwrite (*pnt2)
+                                        pnt2_index = ((*pnt2)-1) * 7;
+               work2[pnt2_index+0]++;
+               work2[pnt2_index+1]+= i;
+               work2[pnt2_index+2]+= j;
+               work2[pnt2_index+6] = j;
+                                        // --------------------------------
+#endif
+         }
+         else if( *(pnt1+1) > 0 ) {
+            if( *(pnt1-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt1-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+                                             work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt2-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+#endif
+            }
+            else {
+               *pnt2 = *(pnt1+1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+3] > i ) work2[((*pnt2)-1)*7+3] = i;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+3] > i ) work2[pnt2_index+3] = i;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+         }
+         else if( *(pnt1-1) > 0 ) {
+            *pnt2 = *(pnt1-1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+            work2[((*pnt2)-1)*7+6] = j;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+                                      work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0) {
+               *pnt2 = *(pnt2-1);
+#ifndef USE_OPTIMIZATIONS
+                                               // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+#endif
+                                 }
+            else {
+               wk_max++;
+               if( wk_max > WORK_SIZE ) {
+                  return(0);
+               }
+               work[wk_max-1] = *pnt2 = wk_max;
+               work2[(wk_max-1)*7+0] = 1;
+               work2[(wk_max-1)*7+1] = i;
+               work2[(wk_max-1)*7+2] = j;
+               work2[(wk_max-1)*7+3] = i;
+               work2[(wk_max-1)*7+4] = i;
+               work2[(wk_max-1)*7+5] = j;
+               work2[(wk_max-1)*7+6] = j;
+            }
+         }
+         else {
+            *pnt2 = 0;
+         }
+      }
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) pnt +=
+arImXsize*AR_PIX_SIZE_DEFAULT;
+   }
+   j = 1;
+   wk = &(work[0]);
+   for(i = 1; i <= wk_max; i++, wk++) {
+      *wk = (*wk==i)? j++: work[(*wk)-1];
+   }
+   *label_num = *wlabel_num = j - 1;
+   if( *label_num == 0 ) {
+      return( l_image );
+   }
+   put_zero( (ARUint8 *)warea, *label_num * sizeof(int) );
+   put_zero( (ARUint8 *)wpos, *label_num * 2 * sizeof(double) );
+   for(i = 0; i < *label_num; i++) {
+      wclip[i*4+0] = lxsize;
+      wclip[i*4+1] = 0;
+      wclip[i*4+2] = lysize;
+      wclip[i*4+3] = 0;
+   }
+   for(i = 0; i < wk_max; i++) {
+      j = work[i] - 1;
+      warea[j] += work2[i*7+0];
+      wpos[j*2+0] += work2[i*7+1];
+      wpos[j*2+1] += work2[i*7+2];
+      if( wclip[j*4+0] > work2[i*7+3] ) wclip[j*4+0] = work2[i*7+3];
+      if( wclip[j*4+1] < work2[i*7+4] ) wclip[j*4+1] = work2[i*7+4];
+      if( wclip[j*4+2] > work2[i*7+5] ) wclip[j*4+2] = work2[i*7+5];
+      if( wclip[j*4+3] < work2[i*7+6] ) wclip[j*4+3] = work2[i*7+6];
+   }
+   for( i = 0; i < *label_num; i++ ) {
+      wpos[i*2+0] /= warea[i];
+      wpos[i*2+1] /= warea[i];
+   }
+   *label_ref = work;
+   *area      = warea;
+   *pos       = wpos;
+   *clip      = wclip;
+   return( l_image );
+}
+
+
+/*
+ * 	Igual a arLabelingHSB pero ya recibe la imagen en el espacio de colores HSV
+ */
+ARInt16 *arLabelingHSB2( unsigned char *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int maxB, int invert)
+{
+   ARUint8 *pnt;                    /* image pointer      */
+   ARInt16 *pnt1, *pnt2;               /* image pointer      */
+   int      *wk;                 /* pointer for work */
+   int      wk_max;                /* work            */
+   int      m,n;                /* work            */
+   int      i,j,k;             /* for loop        */
+   int      lxsize, lysize;
+   int      poff;
+   ARInt16 *l_image;
+   int      *work, *work2;
+   int      *wlabel_num;
+   int      *warea;
+   int      *wclip;
+   double *wpos;
+         double H, S, V;
+#ifdef USE_OPTIMIZATIONS
+         int                pnt2_index; // [tp]
+#endif
+         if( LorR ) {
+      l_image = &l_imageL[0];
+      work = &workL[0];
+      work2 = &work2L[0];
+      wlabel_num = &wlabel_numL;
+      warea = &wareaL[0];
+      wclip = &wclipL[0];
+      wpos = &wposL[0];
+   }
+   else {
+      l_image = &l_imageR[0];
+      work = &workR[0];
+      work2 = &work2R[0];
+      wlabel_num = &wlabel_numR;
+      warea = &wareaR[0];
+      wclip = &wclipR[0];
+      wpos = &wposR[0];
+   }
+   thresh *= 3;
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      lxsize = arImXsize / 2;
+      lysize = arImYsize / 2;
+   }
+   else {
+      lxsize = arImXsize;
+      lysize = arImYsize;
+   }
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[(lysize-1)*lxsize];
+#ifndef USE_OPTIMIZATIONS
+         for(i = 0; i < lxsize; i++) {
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#else
+// 4x loop unrolling
+         for(i = 0; i < lxsize-(lxsize%4); i+=4) {
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#endif
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[lxsize-1];
+#ifndef USE_OPTIMIZATIONS
+   for(i = 0; i < lysize; i++) {
+      *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#else
+// 4x loop unrolling
+   for(i = 0; i < lysize-(lysize%4); i+=4) {
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#endif
+   wk_max = 0;
+   pnt2 = &(l_image[lxsize+1]);
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      pnt = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT*2;
+   }
+   else {
+      pnt = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT;
+   }
+
+   unsigned char* p;
+   for(j = 1; j < lysize-1; j++, pnt+=poff*2, pnt2+=2) {
+      for(i = 1; i < lxsize-1; i++, pnt+=poff, pnt2++) {
+    	  H = R_COMP;
+    	  S = G_COMP;
+    	  V = B_COMP;
+    	  //RGBtoHSV(R_COMP,G_COMP,B_COMP,&H,&S,&V);
+ if((((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB))
+&& !invert) || (!((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB &&
+V<=maxB)) && invert)) {
+            pnt1 = &(pnt2[-lxsize]);
+            if( *pnt1 > 0 ) {
+               *pnt2 = *pnt1;
+#ifndef USE_OPTIMIZATIONS
+                                        // ORIGINAL CODE
+                                        work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                        // OPTIMIZED CODE [tp]
+                                        // ((*pnt2)-1)*7 should be treated as constant, since
+                                        // work2[n] (n=0..xsize*ysize) cannot overwrite (*pnt2)
+                                        pnt2_index = ((*pnt2)-1) * 7;
+               work2[pnt2_index+0]++;
+               work2[pnt2_index+1]+= i;
+               work2[pnt2_index+2]+= j;
+               work2[pnt2_index+6] = j;
+                                        // --------------------------------
+#endif
+         }
+         else if( *(pnt1+1) > 0 ) {
+            if( *(pnt1-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt1-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+                                             work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt2-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+#endif
+            }
+            else {
+               *pnt2 = *(pnt1+1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+3] > i ) work2[((*pnt2)-1)*7+3] = i;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+3] > i ) work2[pnt2_index+3] = i;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+         }
+         else if( *(pnt1-1) > 0 ) {
+            *pnt2 = *(pnt1-1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+            work2[((*pnt2)-1)*7+6] = j;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+                                      work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0) {
+               *pnt2 = *(pnt2-1);
+#ifndef USE_OPTIMIZATIONS
+                                               // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+#endif
+                                 }
+            else {
+               wk_max++;
+               if( wk_max > WORK_SIZE ) {
+                  return(0);
+               }
+               work[wk_max-1] = *pnt2 = wk_max;
+               work2[(wk_max-1)*7+0] = 1;
+               work2[(wk_max-1)*7+1] = i;
+               work2[(wk_max-1)*7+2] = j;
+               work2[(wk_max-1)*7+3] = i;
+               work2[(wk_max-1)*7+4] = i;
+               work2[(wk_max-1)*7+5] = j;
+               work2[(wk_max-1)*7+6] = j;
+            }
+         }
+         else {
+            *pnt2 = 0;
+         }
+      }
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) pnt +=
+arImXsize*AR_PIX_SIZE_DEFAULT;
+   }
+   j = 1;
+   wk = &(work[0]);
+   for(i = 1; i <= wk_max; i++, wk++) {
+      *wk = (*wk==i)? j++: work[(*wk)-1];
+   }
+   *label_num = *wlabel_num = j - 1;
+   if( *label_num == 0 ) {
+      return( l_image );
+   }
+   put_zero( (ARUint8 *)warea, *label_num * sizeof(int) );
+   put_zero( (ARUint8 *)wpos, *label_num * 2 * sizeof(double) );
+   for(i = 0; i < *label_num; i++) {
+      wclip[i*4+0] = lxsize;
+      wclip[i*4+1] = 0;
+      wclip[i*4+2] = lysize;
+      wclip[i*4+3] = 0;
+   }
+   for(i = 0; i < wk_max; i++) {
+      j = work[i] - 1;
+      warea[j] += work2[i*7+0];
+      wpos[j*2+0] += work2[i*7+1];
+      wpos[j*2+1] += work2[i*7+2];
+      if( wclip[j*4+0] > work2[i*7+3] ) wclip[j*4+0] = work2[i*7+3];
+      if( wclip[j*4+1] < work2[i*7+4] ) wclip[j*4+1] = work2[i*7+4];
+      if( wclip[j*4+2] > work2[i*7+5] ) wclip[j*4+2] = work2[i*7+5];
+      if( wclip[j*4+3] < work2[i*7+6] ) wclip[j*4+3] = work2[i*7+6];
+   }
+   for( i = 0; i < *label_num; i++ ) {
+      wpos[i*2+0] /= warea[i];
+      wpos[i*2+1] /= warea[i];
+   }
+   *label_ref = work;
+   *area      = warea;
+   *pos       = wpos;
+   *clip      = wclip;
+   return( l_image );
+}
+
+
+
+ARInt16 *arLabelingHSBMultiple( ARUint8 *image, int thresh,
+                     int *label_num, int **area, double **pos, int **clip,
+                     int **label_ref, int LorR, int *minH, int *maxH, int *minS, int *maxS, int *minB,
+int *maxB, int numHSV, int invert)
+{
+   ARUint8 *pnt;                    /* image pointer      */
+   ARInt16 *pnt1, *pnt2;                /* image pointer     */
+   int     *wk;                  /* pointer for work */
+   int     wk_max;                 /* work             */
+   int     m,n;                 /* work             */
+   int     i,j,k, l;             /* for loop         */
+   int     lxsize, lysize;
+   int      poff;
+   ARInt16 *l_image;
+   int      *work, *work2;
+   int      *wlabel_num;
+   int      *warea;
+   int      *wclip;
+   double *wpos;
+         double H, S, V;
+         int detectado;
+#ifdef USE_OPTIMIZATIONS
+         int               pnt2_index; // [tp]
+#endif
+         if( LorR ) {
+      l_image = &l_imageL[0];
+      work = &workL[0];
+      work2 = &work2L[0];
+      wlabel_num = &wlabel_numL;
+      warea = &wareaL[0];
+      wclip = &wclipL[0];
+      wpos = &wposL[0];
+   }
+   else {
+      l_image = &l_imageR[0];
+      work = &workR[0];
+      work2 = &work2R[0];
+      wlabel_num = &wlabel_numR;
+      warea = &wareaR[0];
+      wclip = &wclipR[0];
+      wpos = &wposR[0];
+   }
+   thresh *= 3;
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      lxsize = arImXsize / 2;
+      lysize = arImYsize / 2;
+   }
+   else {
+      lxsize = arImXsize;
+      lysize = arImYsize;
+   }
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[(lysize-1)*lxsize];
+#ifndef USE_OPTIMIZATIONS
+         for(i = 0; i < lxsize; i++) {
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#else
+// 4x loop unrolling
+         for(i = 0; i < lxsize-(lxsize%4); i+=4) {
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#endif
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[lxsize-1];
+#ifndef USE_OPTIMIZATIONS
+   for(i = 0; i < lysize; i++) {
+      *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#else
+// 4x loop unrolling
+   for(i = 0; i < lysize-(lysize%4); i+=4) {
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#endif
+   wk_max = 0;
+   pnt2 = &(l_image[lxsize+1]);
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      pnt = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT*2;
+   }
+   else {
+      pnt = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT;
+   }
+   for(j = 1; j < lysize-1; j++, pnt+=poff*2, pnt2+=2) {
+      for(i = 1; i < lxsize-1; i++, pnt+=poff, pnt2++) {
+    	 detectado=0;
+         RGBtoHSV(R_COMP,G_COMP,B_COMP,&H,&S,&V);
+         for(l=0;l<numHSV;l++) {
+                 if((H>=*(minH+l) && H<=*(maxH+l)) && (S>=*(minS+l) && S<=*(maxS+l))&& (V>=*(minB+l) && V<=*(maxB+l))) {
+                     detectado=1;
+                     break;
+                 }
+          }
+          if(detectado) {
+        	  // printf("H=%f S=%f V=%f, ",H,S,V);
+        	  // if( *(pnt+0) + *(pnt+1) + *(pnt+2) <= thresh ) { //original
+            pnt1 = &(pnt2[-lxsize]);
+            if( *pnt1 > 0 ) {
+                *pnt2 = *pnt1;
+#ifndef USE_OPTIMIZATIONS
+                                          // ORIGINAL CODE
+                                          work2[((*pnt2)-1)*7+0] ++;
+                work2[((*pnt2)-1)*7+1] += i;
+                work2[((*pnt2)-1)*7+2] += j;
+                work2[((*pnt2)-1)*7+6] = j;
+#else
+                                          // OPTIMIZED CODE [tp]
+                                          // ((*pnt2)-1)*7 should be treated as constant, since
+                                          // work2[n] (n=0..xsize*ysize) cannot overwrite (*pnt2)
+                                          pnt2_index = ((*pnt2)-1) * 7;
+                work2[pnt2_index+0]++;
+                work2[pnt2_index+1]+= i;
+                work2[pnt2_index+2]+= j;
+                work2[pnt2_index+6] = j;
+                                          // --------------------------------
+#endif
+            }
+            else if( *(pnt1+1) > 0 ) {
+                if( *(pnt1-1) > 0 ) {
+                   m = work[*(pnt1+1)-1];
+                   n = work[*(pnt1-1)-1];
+                   if( m > n ) {
+                      *pnt2 = n;
+                      wk = &(work[0]);
+                      for(k = 0; k < wk_max; k++) {
+                         if( *wk == m ) *wk = n;
+                         wk++;
+                      }
+                   }
+                   else if( m < n ) {
+                      *pnt2 = m;
+                      wk = &(work[0]);
+                      for(k = 0; k < wk_max; k++) {
+                         if( *wk == n ) *wk = m;
+                         wk++;
+                 }
+              }
+              else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                            // ORIGINAL CODE
+                                            work2[((*pnt2)-1)*7+0] ++;
+              work2[((*pnt2)-1)*7+1] += i;
+              work2[((*pnt2)-1)*7+2] += j;
+              work2[((*pnt2)-1)*7+6] = j;
+#else
+                                            // PERFORMANCE OPTIMIZATION:
+                                            pnt2_index = ((*pnt2)-1) * 7;
+                                            work2[pnt2_index+0]++;
+                                            work2[pnt2_index+1]+= i;
+                                            work2[pnt2_index+2]+= j;
+                                            work2[pnt2_index+6] = j;
+#endif
+           }
+           else if( *(pnt2-1) > 0 ) {
+              m = work[*(pnt1+1)-1];
+              n = work[*(pnt2-1)-1];
+              if( m > n ) {
+                 *pnt2 = n;
+                 wk = &(work[0]);
+                 for(k = 0; k < wk_max; k++) {
+                    if( *wk == m ) *wk = n;
+                    wk++;
+                 }
+              }
+              else if( m < n ) {
+                 *pnt2 = m;
+                 wk = &(work[0]);
+                 for(k = 0; k < wk_max; k++) {
+                    if( *wk == n ) *wk = m;
+                    wk++;
+                 }
+              }
+              else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                            // ORIGINAL CODE
+              work2[((*pnt2)-1)*7+0] ++;
+              work2[((*pnt2)-1)*7+1] += i;
+              work2[((*pnt2)-1)*7+2] += j;
+#else
+                                            // PERFORMANCE OPTIMIZATION:
+                                            pnt2_index = ((*pnt2)-1) * 7;
+                                            work2[pnt2_index+0]++;
+                                            work2[pnt2_index+1]+= i;
+                                            work2[pnt2_index+2]+= j;
+#endif
+            }
+            else {
+               *pnt2 = *(pnt1+1);
+#ifndef USE_OPTIMIZATIONS
+                                            // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+3] > i ) work2[((*pnt2)-1)*7+3] = i;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                            // PERFORMANCE OPTIMIZATION:
+                                            pnt2_index = ((*pnt2)-1) * 7;
+                                            work2[pnt2_index+0]++;
+                                            work2[pnt2_index+1]+= i;
+                                            work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+3] > i ) work2[pnt2_index+3] = i;
+                                            work2[pnt2_index+6] = j;
+#endif
+            }
+         }
+         else if( *(pnt1-1) > 0 ) {
+            *pnt2 = *(pnt1-1);
+#ifndef USE_OPTIMIZATIONS
+                                            // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+            work2[((*pnt2)-1)*7+6] = j;
+#else
+                                     // PERFORMANCE OPTIMIZATION:
+                                     pnt2_index = ((*pnt2)-1) * 7;
+                                     work2[pnt2_index+0]++;
+                                     work2[pnt2_index+1]+= i;
+                                     work2[pnt2_index+2]+= j;
+            if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+                                     work2[pnt2_index+6] = j;
+#endif
+         }
+         else if( *(pnt2-1) > 0) {
+            *pnt2 = *(pnt2-1);
+#ifndef USE_OPTIMIZATIONS
+                                            // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+#else
+                                     // PERFORMANCE OPTIMIZATION:
+                                     pnt2_index = ((*pnt2)-1) * 7;
+                                     work2[pnt2_index+0]++;
+                                     work2[pnt2_index+1]+= i;
+                                     work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+#endif
+                               }
+            else {
+               wk_max++;
+               if( wk_max > WORK_SIZE ) {
+                  return(0);
+               }
+               work[wk_max-1] = *pnt2 = wk_max;
+               work2[(wk_max-1)*7+0] = 1;
+               work2[(wk_max-1)*7+1] = i;
+               work2[(wk_max-1)*7+2] = j;
+               work2[(wk_max-1)*7+3] = i;
+               work2[(wk_max-1)*7+4] = i;
+               work2[(wk_max-1)*7+5] = j;
+               work2[(wk_max-1)*7+6] = j;
+            }
+         }
+         else {
+            *pnt2 = 0;
+         }
+      }
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) pnt +=arImXsize*AR_PIX_SIZE_DEFAULT;
+   }
+   j = 1;
+   wk = &(work[0]);
+   for(i = 1; i <= wk_max; i++, wk++) {
+      *wk = (*wk==i)? j++: work[(*wk)-1];
+   }
+   *label_num = *wlabel_num = j - 1;
+   if( *label_num == 0 ) {
+      return( l_image );
+   }
+   put_zero( (ARUint8 *)warea, *label_num * sizeof(int) );
+   put_zero( (ARUint8 *)wpos, *label_num * 2 * sizeof(double) );
+   for(i = 0; i < *label_num; i++) {
+      wclip[i*4+0] = lxsize;
+      wclip[i*4+1] = 0;
+      wclip[i*4+2] = lysize;
+      wclip[i*4+3] = 0;
+   }
+   for(i = 0; i < wk_max; i++) {
+      j = work[i] - 1;
+      warea[j] += work2[i*7+0];
+      wpos[j*2+0] += work2[i*7+1];
+     wpos[j*2+1] += work2[i*7+2];
+     if( wclip[j*4+0] > work2[i*7+3] ) wclip[j*4+0] = work2[i*7+3];
+     if( wclip[j*4+1] < work2[i*7+4] ) wclip[j*4+1] = work2[i*7+4];
+     if( wclip[j*4+2] > work2[i*7+5] ) wclip[j*4+2] = work2[i*7+5];
+     if( wclip[j*4+3] < work2[i*7+6] ) wclip[j*4+3] = work2[i*7+6];
+  }
+  for( i = 0; i < *label_num; i++ ) {
+     wpos[i*2+0] /= warea[i];
+     wpos[i*2+1] /= warea[i];
+  }
+  *label_ref = work;
+  *area     = warea;
+  *pos      = wpos;
+  *clip     = wclip;
+  return( l_image );
+}
+
+
+
+ARInt16 *arLabelingHSBFixedArea( ARUint8 *image, int thresh,
+                    int *label_num, int **area, double **pos, int **clip,
+                    int **label_ref, int LorR, int minH, int maxH, int minS, int maxS, int minB, int
+					maxB, int invert,int xsize,int ysize)
+{
+   ARUint8 *pnt;                    /* image pointer      */
+   ARInt16 *pnt1, *pnt2;               /* image pointer      */
+   int      *wk;                 /* pointer for work */
+   int      wk_max;                /* work            */
+   int      m,n;                /* work            */
+   int      i,j,k;             /* for loop        */
+   int      lxsize, lysize;
+   int      poff;
+   ARInt16 *l_image;
+   int      *work, *work2;
+   int      *wlabel_num;
+   int      *warea;
+   int      *wclip;
+   double *wpos;
+         double H, S, V;
+#ifdef USE_OPTIMIZATIONS
+         int                pnt2_index; // [tp]
+#endif
+         if( LorR ) {
+      l_image = &l_imageL[0];
+      work = &workL[0];
+      work2 = &work2L[0];
+      wlabel_num = &wlabel_numL;
+      warea = &wareaL[0];
+      wclip = &wclipL[0];
+      wpos = &wposL[0];
+   }
+   else {
+      l_image = &l_imageR[0];
+      work = &workR[0];
+      work2 = &work2R[0];
+      wlabel_num = &wlabel_numR;
+      warea = &wareaR[0];
+      wclip = &wclipR[0];
+      wpos = &wposR[0];
+   }
+   thresh *= 3;
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      lxsize = (int)xsize / 2;
+      lysize = (int)ysize / 2;
+   }
+   else {
+      lxsize = xsize;
+      lysize = ysize;
+   }
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[(lysize-1)*lxsize];
+#ifndef USE_OPTIMIZATIONS
+         for(i = 0; i < lxsize; i++) {
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#else
+// 4x loop unrolling
+         for(i = 0; i < lxsize-(lxsize%4); i+=4) {
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+      *(pnt1++) = *(pnt2++) = 0;
+   }
+#endif
+   pnt1 = &l_image[0];
+   pnt2 = &l_image[lxsize-1];
+#ifndef USE_OPTIMIZATIONS
+   for(i = 0; i < lysize; i++) {
+      *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#else
+// 4x loop unrolling
+   for(i = 0; i < lysize-(lysize%4); i+=4) {
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+                 *pnt1 = *pnt2 = 0;
+      pnt1 += lxsize;
+      pnt2 += lxsize;
+   }
+#endif
+   wk_max = 0;
+   pnt2 = &(l_image[lxsize+1]);
+   if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+      pnt = &(image[(arImXsize*2+2)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT*2;
+   }
+   else {
+      pnt = &(image[(arImXsize+1)*AR_PIX_SIZE_DEFAULT]);
+      poff = AR_PIX_SIZE_DEFAULT;
+   }
+   //printf("lxsize = %d\n",lxsize);
+   //printf("lysize = %d\n",lysize);
+   for(j = 1; j < lysize-1; j++, pnt+=poff*2, pnt2+=2) {
+	  // printf("* ---> j = %d\n",j);
+      for(i = 1; i < lxsize-1; i++, pnt+=poff, pnt2++) {
+    	//  printf("  ---> i = %d\n",i);
+    	 // printf("p0 \n");
+    	 // printf("R_COMP = %f \n",(double)R_COMP);
+    	 // printf("G_COMP = %f \n",(double)G_COMP);
+    	 // printf("B_COMP = %f \n",(double)B_COMP);
+    	 // printf("p0.5 \n");
+    	  RGBtoHSV(R_COMP,G_COMP,B_COMP,&H,&S,&V);
+    	 // printf("p1 \n");
+    	  if((((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB)) && !invert)
+    		|| (!((H>=minH && H<=maxH) && (S>=minS && S<=maxS) && (V>=minB && V<=maxB)) && invert)) {
+            //printf("p1 \n");
+    		pnt1 = &(pnt2[-lxsize]);
+    		//printf("p2 \n");
+            if( *pnt1 > 0 ) {
+               *pnt2 = *pnt1;
+#ifndef USE_OPTIMIZATIONS
+                                        // ORIGINAL CODE
+                                        work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                        // OPTIMIZED CODE [tp]
+                                        // ((*pnt2)-1)*7 should be treated as constant, since
+                                        // work2[n] (n=0..xsize*ysize) cannot overwrite (*pnt2)
+               pnt2_index = ((*pnt2)-1) * 7;
+               work2[pnt2_index+0]++;
+               work2[pnt2_index+1]+= i;
+               work2[pnt2_index+2]+= j;
+               work2[pnt2_index+6] = j;
+                                        // --------------------------------
+#endif
+         }
+         else if( *(pnt1+1) > 0 ) {
+            if( *(pnt1-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt1-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+                                             work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0 ) {
+               m = work[*(pnt1+1)-1];
+               n = work[*(pnt2-1)-1];
+               if( m > n ) {
+                  *pnt2 = n;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == m ) *wk = n;
+                     wk++;
+                  }
+               }
+               else if( m < n ) {
+                  *pnt2 = m;
+                  wk = &(work[0]);
+                  for(k = 0; k < wk_max; k++) {
+                     if( *wk == n ) *wk = m;
+                     wk++;
+                  }
+               }
+               else *pnt2 = m;
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+#endif
+            }
+            else {
+               *pnt2 = *(pnt1+1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+3] > i ) work2[((*pnt2)-1)*7+3] = i;
+               work2[((*pnt2)-1)*7+6] = j;
+#else
+                                             // PERFORMANCE OPTIMIZATION:
+                                             pnt2_index = ((*pnt2)-1) * 7;
+                                             work2[pnt2_index+0]++;
+                                             work2[pnt2_index+1]+= i;
+                                             work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+3] > i ) work2[pnt2_index+3] = i;
+                                             work2[pnt2_index+6] = j;
+#endif
+            }
+         }
+         else if( *(pnt1-1) > 0 ) {
+            *pnt2 = *(pnt1-1);
+#ifndef USE_OPTIMIZATIONS
+                                             // ORIGINAL CODE
+            work2[((*pnt2)-1)*7+0] ++;
+            work2[((*pnt2)-1)*7+1] += i;
+            work2[((*pnt2)-1)*7+2] += j;
+            if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+            work2[((*pnt2)-1)*7+6] = j;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+                                      work2[pnt2_index+6] = j;
+#endif
+            }
+            else if( *(pnt2-1) > 0) {
+               *pnt2 = *(pnt2-1);
+#ifndef USE_OPTIMIZATIONS
+                                               // ORIGINAL CODE
+               work2[((*pnt2)-1)*7+0] ++;
+               work2[((*pnt2)-1)*7+1] += i;
+               work2[((*pnt2)-1)*7+2] += j;
+               if( work2[((*pnt2)-1)*7+4] < i ) work2[((*pnt2)-1)*7+4] = i;
+#else
+                                      // PERFORMANCE OPTIMIZATION:
+                                      pnt2_index = ((*pnt2)-1) * 7;
+                                      work2[pnt2_index+0]++;
+                                      work2[pnt2_index+1]+= i;
+                                      work2[pnt2_index+2]+= j;
+               if( work2[pnt2_index+4] < i ) work2[pnt2_index+4] = i;
+#endif
+                                 }
+            else {
+               wk_max++;
+               if( wk_max > WORK_SIZE ) {
+                  return(0);
+               }
+               work[wk_max-1] = *pnt2 = wk_max;
+               work2[(wk_max-1)*7+0] = 1;
+               work2[(wk_max-1)*7+1] = i;
+               work2[(wk_max-1)*7+2] = j;
+               work2[(wk_max-1)*7+3] = i;
+               work2[(wk_max-1)*7+4] = i;
+               work2[(wk_max-1)*7+5] = j;
+               work2[(wk_max-1)*7+6] = j;
+            }
+         }
+         else {
+            *pnt2 = 0;
+         }
+      }
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) pnt +=
+arImXsize*AR_PIX_SIZE_DEFAULT;
+   }
+   j = 1;
+   wk = &(work[0]);
+   for(i = 1; i <= wk_max; i++, wk++) {
+      *wk = (*wk==i)? j++: work[(*wk)-1];
+   }
+   *label_num = *wlabel_num = j - 1;
+   if( *label_num == 0 ) {
+      return( l_image );
+   }
+   put_zero( (ARUint8 *)warea, *label_num * sizeof(int) );
+   put_zero( (ARUint8 *)wpos, *label_num * 2 * sizeof(double) );
+   for(i = 0; i < *label_num; i++) {
+      wclip[i*4+0] = lxsize;
+      wclip[i*4+1] = 0;
+      wclip[i*4+2] = lysize;
+      wclip[i*4+3] = 0;
+   }
+   for(i = 0; i < wk_max; i++) {
+      j = work[i] - 1;
+      warea[j] += work2[i*7+0];
+      wpos[j*2+0] += work2[i*7+1];
+      wpos[j*2+1] += work2[i*7+2];
+      if( wclip[j*4+0] > work2[i*7+3] ) wclip[j*4+0] = work2[i*7+3];
+      if( wclip[j*4+1] < work2[i*7+4] ) wclip[j*4+1] = work2[i*7+4];
+      if( wclip[j*4+2] > work2[i*7+5] ) wclip[j*4+2] = work2[i*7+5];
+      if( wclip[j*4+3] < work2[i*7+6] ) wclip[j*4+3] = work2[i*7+6];
+   }
+   for( i = 0; i < *label_num; i++ ) {
+      wpos[i*2+0] /= warea[i];
+      wpos[i*2+1] /= warea[i];
+   }
+   *label_ref = work;
+   *area      = warea;
+   *pos       = wpos;
+   *clip      = wclip;
+   return( l_image );
 }

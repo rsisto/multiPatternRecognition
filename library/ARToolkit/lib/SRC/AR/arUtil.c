@@ -21,6 +21,7 @@
 #include <AR/param.h>
 #include <AR/matrix.h>
 #include <AR/ar.h>
+#include <formatopixel.h>
 
 
 int        arDebug                 = 0;
@@ -81,6 +82,10 @@ int arsInitCparam( ARSParam *sparam )
     arUtilMatInv( arsParam.matL2R, arsMatR2L );
 
     return(0);
+}
+
+int arGetClipLine(int* clip, double line[4][3], double v[4][2]){
+	//TODO armar la linea con la info que tengo en el clip y luego hacer la llamada correspondiente desde arGetColorMarkerInfo
 }
 
 int arGetLine(int x_coord[], int y_coord[], int coord_num,
@@ -310,5 +315,23 @@ void arUtilSleep( int msec )
 	Sleep(msec);
 #endif
     return;
+}
+
+
+
+int arUtilGetSubImage(ARUint8 * imageSource,ARUint8 * imageDest, int xsize_subimage, int ysize_subimage, int xIni, int yIni){
+	if(xsize_subimage>=0 && ysize_subimage>=0){
+		int index;
+		ARUint8 *pnt;
+		pnt = (imageSource+(arImXsize*VALORES_POR_PIXEL*(yIni-1))+(xIni*VALORES_POR_PIXEL));
+		for (index = 0; index < ysize_subimage; index++) {
+			memcpy(&imageDest[index*xsize_subimage*VALORES_POR_PIXEL],pnt,xsize_subimage*VALORES_POR_PIXEL);
+			pnt = (imageSource+(arImXsize*VALORES_POR_PIXEL*(yIni + index-1))+(xIni*VALORES_POR_PIXEL));
+		}
+		return 0;
+	}else{
+		return 1;
+		imageDest = 0;
+	}
 }
 

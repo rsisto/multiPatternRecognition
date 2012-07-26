@@ -282,6 +282,34 @@ void argDrawSquare( double vertex[4][2], int xwin, int ywin );
 */
 void argLineSeg( double x1, double y1, double x2, double y2, int xwin, int ywin );
 
+/**
+ * Limpia la pantalla especificada
+ *
+ * xwin=0 , ywin=0 ---> Pantalla principal
+ * xwin=1 , ywin=1 ---> Pantalla chica inferior izquierda
+ * xwin=2 , ywin=1 ---> Pantalla chica inferior derecha
+ */
+void argCleanWindow(int xwin, int ywin);
+
+/**
+ * smarichal - Sebastian Marichal
+ *
+ * \fn void argLineSeg( double x1, double y1, double x2, double y2, int xwin, int ywin )
+* \brief Draw a line.
+*
+* Draw a segment.T The position of the line is affected by openGL
+* model view matrix and call to argDrawMode2D argDrawMode3D.
+* Generally call in a 2D mode (so after a argDrawMode2D).
+* \param x1 x position of the first point.
+* \param y1 y position of the first point.
+* \param x2 x position of the second point.
+* \param y2 y position of the second point.
+* \param xwin XXXBK
+* \param ywin XXXBK
+* \param zoom Utiliza el zoom indicado
+*/
+void argLineZoomSeg( double x1, double y1, double x2, double y2, int xwin, int ywin,double zoom,int xOffset,int yOffset );
+
 /** \fn void argLineSegHMD( double x1, double y1, double x2, double y2 )
 * \brief  Draw a line with HMD mode.
 *

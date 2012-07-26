@@ -49,7 +49,11 @@ ARMultiMarkerInfoT *arMultiReadConfigFile( const char *filename )
         }
 
         get_buff(buf, 256, fp);
-        if( sscanf(buf, "%lf %lf", &marker[i].center[0], &marker[i].center[1]) != 2 ) {
+        //printf("buf=%s",buf);
+        int salida = sscanf(buf, "%lf %lf", &marker[i].center[0], &marker[i].center[1]);
+        //printf("salida=%d \n",salida);
+        if(  salida!= 2 ) {
+            //printf("x= %lf, y=%lf",marker[i].center[0],marker[i].center[1]);
             fclose(fp); free(marker); return NULL;
         }
 

@@ -19,7 +19,7 @@ extern "C" {
 
 #include <stdlib.h>
 #include <linux/types.h>
-#include <libv4l1-videodev.h>
+#include <linux/videodev.h>
 #include <libraw1394/raw1394.h>
 #include <libdc1394/dc1394_control.h>
 

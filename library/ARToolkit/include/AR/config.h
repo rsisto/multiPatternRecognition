@@ -206,7 +206,7 @@
 
 
 /*  For NVIDIA OpenGL Driver  */
-#undef    AR_OPENGL_TEXTURE_RECTANGLE
+#define    AR_OPENGL_TEXTURE_RECTANGLE
 
 
 

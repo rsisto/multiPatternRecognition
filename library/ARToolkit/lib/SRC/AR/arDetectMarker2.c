@@ -318,3 +318,84 @@ static int get_vertex( int x_coord[], int y_coord[], int st,  int ed,
 
     return(0);
 }
+
+
+//-- AGREGADOS PARA DETECCION DE COLORES
+
+   ARMarkerInfo2 *arDetectMarker3( ARInt16 *limage, int label_num, int *label_ref, int *warea, double *wpos, int *wclip,
+                                   int area_max, int area_min, int *marker_num )
+   {
+      ARMarkerInfo2 *pm;
+      int            xsize, ysize;
+      int            marker_num2;
+      int            i, j, ret;
+      double            d;
+      if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+         area_min /= 4;
+         area_max /= 4;
+         xsize = arImXsize / 2;
+         ysize = arImYsize / 2;
+      }
+      else {
+         xsize = arImXsize;
+         ysize = arImYsize;
+      }
+      marker_num2 = 0;
+      for(i=0; i<label_num; i++ ) {
+         if( warea[i] < area_min || warea[i] > area_max ) continue; //si el area es mayor o menor que los valores maximos y minimos, nos la saltamos
+         if( wclip[i*4+0] == 1 || wclip[i*4+1] == xsize-2 ) continue; //Si ocupa toda la pantalla nos la saltamos..?
+         if( wclip[i*4+2] == 1 || wclip[i*4+3] == ysize-2 ) continue; //Si ocupa toda la pantalla nos la saltamos..?
+         ret = arGetContour( limage, label_ref, i+1,
+                          &(wclip[i*4]), &(marker_info2[marker_num2]));
+         if( ret < 0 ) continue; //si ha habido error nos saltamos esta etiqueta y continuamos con la siguiente iteración
+         //ret = check_square( warea[i], &(marker_info2[marker_num2]), factor );
+         //if( ret < 0 ) continue;
+         marker_info2[marker_num2].area = warea[i];
+         marker_info2[marker_num2].pos[0] = wpos[i*2+0];
+         marker_info2[marker_num2].pos[1] = wpos[i*2+1];
+         marker_num2++;
+         if( marker_num2 == AR_SQUARE_MAX ) break;
+
+      }
+      for( i=0; i < marker_num2; i++ ) {                            //para cada marca se calculan que marcas son externas y cuales internas a otras marcas
+         for( j=i+1; j < marker_num2; j++ ) {                        //las internas no nos valen
+            d = (marker_info2[i].pos[0] - marker_info2[j].pos[0])           // d = distancia entre una marca y la siguiente
+              * (marker_info2[i].pos[0] - marker_info2[j].pos[0])             //pos[0] es la coord X de la posicion de la marca
+              + (marker_info2[i].pos[1] - marker_info2[j].pos[1])             //pos[1] es la coord Y de la posicion de la marca
+              * (marker_info2[i].pos[1] - marker_info2[j].pos[1]);
+            if( marker_info2[i].area > marker_info2[j].area ) { //si la marca i es mas grande que la j
+              if( d < marker_info2[i].area / 4 ) {               //si la marca j esta dentro de la marca i
+                 marker_info2[j].area = 0;                        //j no es una marca --> area de j = 0
+              }
+           }
+           else {                                  //sino si la marca j es mas grande
+              if( d < marker_info2[j].area / 4 ) {              //si la marca j esta dentro de la marca i
+                 marker_info2[i].area = 0;                      //i no es una marca ...> area de i = 0
+              }
+           }
+        }
+     }
+     for( i=0; i < marker_num2; i++ ) {                         //se eliminan de la lista de marcas detectadas, aquellas que no son validas (internas a otras)
+        if( marker_info2[i].area == 0.0 ) {
+           for( j=i+1; j < marker_num2; j++ ) {
+              marker_info2[j-1] = marker_info2[j];
+           }
+           marker_num2--;
+        }
+     }
+     if( arImageProcMode == AR_IMAGE_PROC_IN_HALF ) {
+        pm = &(marker_info2[0]);
+        for( i = 0; i < marker_num2; i++ ) {
+           pm->area *= 4;
+           pm->pos[0] *= 2.0;
+           pm->pos[1] *= 2.0;
+           for( j = 0; j< pm->coord_num; j++ ) {
+              pm->x_coord[j] *= 2;
+              pm->y_coord[j] *= 2;
+           }
+           pm++;
+        }
+     }
+     *marker_num = marker_num2;
+     return( &(marker_info2[0]) );
+   }
