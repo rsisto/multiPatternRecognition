@@ -11,13 +11,18 @@
 #include "multiPatternDetection.h"
 
 /* Object Data */
-char            *model_name = "Data/object_data2";
+char            *model_name = "Data/object_data";
 ObjectData_T    *object;
 int             objectnum;
 
 int             xsize, ysize;
-int				thresh = 100;
+int		thresh = 100;
 int             count = 0;
+
+/*Variable para el tiempo de refresh */
+double		last_refresh;
+
+ double		refresh_windows = 0.05;
 
 /* set up the video format globals */
 
@@ -112,13 +117,33 @@ void arMultiRefresh(void)
       printf("Data : %f %f %f\n", object[i].trans[0][3], object[i].trans[1][3], object[i].trans[2][3]);
     }
 
-  
+  last_refresh = arUtilTimer();
 }
 
 ObjectData_T  *arMultiGetObjectData( char *name ){
-  //TODO
-  return 0;
+   double now = arUtilTimer();
+   if(now-last_refresh > refresh_windows )  {
+	arMultiRefresh();
+	}
+ int i;
+   for( i = 0; i < objectnum; i++ ){
+      if(strcmp(name, object[i].name)==0){
+        return &object[i];
+      }
+   }
+  return NULL;
 }  
+
+int arMultiIsMarkerPresent(char *id){
+   ObjectData_T *objeto = arMultiGetObjectData(id);
+   if(objeto != NULL){
+     return  objeto->visible ;
+   }else{
+      // dio error
+      return -1;
+    }
+   
+}
 
 void arMultiInit( void )
 {
@@ -147,7 +172,8 @@ void arMultiInit( void )
       printf("Error al leer data obj\n");
       exit(0);
     }
-
+ arUtilTimerReset();
+last_refresh = arUtilTimer();
 }
 
 

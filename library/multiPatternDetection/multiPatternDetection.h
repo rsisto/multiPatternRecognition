@@ -14,4 +14,6 @@ ObjectData_T  *arMultiGetObjectData( char *name );
 //Cleanup data and library, release camera
 void arMultiCleanup();
 
+int arMultiIsMarkerPresent(char *id);
+
 #endif
