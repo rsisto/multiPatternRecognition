@@ -14,9 +14,9 @@
 int main(int argc, char **argv)
 {
   //initialize applications
-  arMultiInit();
+  arMultiInit(NULL);
   printf("PASO Init\n");
-  arVideoCapStart();
+  
   char c;
   
   while (1)

@@ -1,6 +1,6 @@
 #Format:
 #** <obj_name>
-#** <obj_pattern filename>
+#** <obj_pattern filename> relative to this file
 #** <marker_width>
 #** <centerX centerY>
 
@@ -9,12 +9,12 @@
 
 #pattern 1
 Hiro
-Data/patt.hiro
+patt.hiro
 80
 0,0 0,0
 
 #pattern 2
 Kanji
-Data/patt.kanji
+patt.kanji
 80
 0,0 0,0

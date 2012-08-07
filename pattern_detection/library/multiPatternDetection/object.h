@@ -14,6 +14,6 @@ typedef struct {
     double     marker_center[2]; // TOOD: find out
 } ObjectData_T;
 
-ObjectData_T  *read_ObjData( char *name, int *objectnum );
+ObjectData_T  *read_ObjData(char* data_path, char *name, int *objectnum );
 
 #endif

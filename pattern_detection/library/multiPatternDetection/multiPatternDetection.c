@@ -11,45 +11,44 @@
 #include "multiPatternDetection.h"
 
 /* Object Data */
-char            *model_name = "Data/object_data";
+//Path to the Data folder containing object_data and camera_para.dat files
+char *data_path = "Data" ;
+char            *model_name = "object_data";
 ObjectData_T    *object;
 int             objectnum;
 
-int             xsize, ysize;
-int		thresh = 100;
-int             count = 0;
+int xsize, ysize;
+int	thresh = 100;
+int count = 0;
 
 /*Variable para el tiempo de refresh */
 double		last_refresh;
-
- double		refresh_windows = 0.05;
+double		refresh_windows = 0.05;
 
 /* set up the video format globals */
-
 char			*vconf = "";
-
-
-char           *cparam_name    = "Data/camera_para.dat";
+char           *cparam_name    = "camera_para.dat";
 ARParam         cparam;
 
 /* refresh */
 void arMultiRefresh(void)
 {
+  
   ARUint8         *dataPtr;
   ARMarkerInfo    *marker_info;
   int             marker_num;
   int             i,j,k;
-  arVideoCapNext();
-  arVideoCapNext();
   arVideoCapNext();
    
   /* grab a video frame */
   if( (dataPtr = (ARUint8 *)arVideoGetImage()) == NULL )
     {
       // arUtilSleep(2);
+      printf("arVideGetImage retorno null \n");
       return;
     }
-
+  printf("dataptr %d %d\n",dataPtr,dataPtr[0]);
+  
   if( count == 0 ) arUtilTimerReset();
   count++;
 
@@ -58,37 +57,33 @@ void arMultiRefresh(void)
   if(arDetectMarker(dataPtr, thresh,
                     &marker_info, &marker_num) < 0 )
     {
+      printf("error at arDetectMarker\n");
       arMultiCleanup();
       exit(0);
     }
   if (marker_num > 0)
     {
-      //printf("Detecte %d marcas\n",marker_num);
+      printf("Detecte %d marcas\n",marker_num);
     }
-  for( i = 0; i < marker_num; i++ )
-    {
-      //argDrawSquare(marker_info[i].vertex,0,0);
-    }
-
   /* check for known patterns */
   for( i = 0; i < objectnum; i++ )
     {
-
+      //printf("i %d\n",i);
       k = -1;
       for( j = 0; j < marker_num; j++ )
         {
-          // printf("j %d\n",j);
+           printf("j %d\n",j);
           if( object[i].id == marker_info[j].id)
             {
 
               /* you've found a pattern */
-              //printf("Found pattern: %d ",object[i].id);
+              printf("Found pattern: %d ",object[i].id);
               //glColor3f( 0.0, 1.0, 0.0 );
               //argDrawSquare(marker_info[j].vertex,0,0);
 
               if( k == -1 ) k = j;
               else /* make sure you have the best pattern (highest confidence factor) */
-                // printf("not Found pattern: %d ",object[i].id);
+                 printf("not Found pattern: %d ",object[i].id);
                 if( marker_info[k].cf < marker_info[j].cf ) k = j;
             }
         }
@@ -116,7 +111,7 @@ void arMultiRefresh(void)
       printf("Objeto visible %s\n", object[i].name);
       printf("Data : %f %f %f\n", object[i].trans[0][3], object[i].trans[1][3], object[i].trans[2][3]);
     }
-
+  object[0].visible=1;
   last_refresh = arUtilTimer();
 }
 
@@ -140,15 +135,19 @@ int arMultiIsMarkerPresent(char *id){
      return  objeto->visible ;
    }else{
       // dio error
+      //printf("arMultiIsMarkerPresent - undefined id\n");
       return -1;
     }
+    
    
 }
 
-void arMultiInit( void )
+void arMultiInit( char* _data_path )
 {
   ARParam  wparam;
-
+  if(_data_path != NULL){
+    data_path = _data_path;
+  }
   /* open the video path */
   if( arVideoOpen( vconf ) < 0 ) exit(0);
   /* find the size of the window */
@@ -156,7 +155,13 @@ void arMultiInit( void )
   printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
 
   /* set the initial camera parameters */
-  if( arParamLoad(cparam_name, 1, &wparam) < 0 )
+  char camdata_path [strlen(data_path) + strlen(cparam_name) + 10];
+  strcpy(camdata_path,data_path) ; 
+  strcat(camdata_path,"/") ;
+  strcat(camdata_path,cparam_name);
+  printf("path: %s\n",data_path);
+  printf("Camera file: %s\n",camdata_path);
+  if( arParamLoad(camdata_path, 1, &wparam) < 0 )
     {
       printf("Camera parameter load error !!\n");
       exit(0);
@@ -167,13 +172,15 @@ void arMultiInit( void )
   arParamDisp( &cparam );
 
   /* load in the object data - trained markers and associated bitmap files */
-  if( (object=read_ObjData(model_name, &objectnum)) == NULL )
+  if( (object=read_ObjData(data_path,model_name, &objectnum)) == NULL )
     {
       printf("Error al leer data obj\n");
       exit(0);
     }
- arUtilTimerReset();
-last_refresh = arUtilTimer();
+  arUtilTimerReset();
+  arVideoCapStart();
+  last_refresh = arUtilTimer();
+  
 }
 
 

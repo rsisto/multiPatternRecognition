@@ -28,16 +28,20 @@
 
 static char *get_buff( char *buf, int n, FILE *fp );
 
-ObjectData_T *read_ObjData( char *name, int *objectnum )
+ObjectData_T *read_ObjData(char* data_path, char *name, int *objectnum )
 {
   FILE          *fp;
   ObjectData_T  *object;
-  char           buf[256], buf1[256];
+  char           buf[256], buf1[256] , buf2[256];
   int            i;
+  
+  strcpy(buf2,data_path);
+  strcat(buf2,"/");
+  strcat(buf2,name);
+  
+  printf("Opening Data File %s\n",buf2);
 
-  printf("Opening Data File %s\n",name);
-
-  if( (fp=fopen(name, "r")) == NULL )
+  if( (fp=fopen(buf2, "r")) == NULL )
     {
       printf("Can't find the file - quitting \n");
       return(0);
@@ -82,9 +86,12 @@ ObjectData_T *read_ObjData( char *name, int *objectnum )
         }
 
       printf("%s \n", buf1);
+      strcpy(buf2,data_path);
+      strcat(buf2,"/");
+      strcat(buf2,buf1);
+      printf("path: %s\n",buf2);
 
-
-      if( (object[i].id = arLoadPatt(buf1)) < 0 )
+      if( (object[i].id = arLoadPatt(buf2)) < 0 )
         {
           printf("2 \n");
           fclose(fp);
@@ -118,7 +125,7 @@ ObjectData_T *read_ObjData( char *name, int *objectnum )
     }
 
   fclose(fp);
-
+  
   return( object );
 }
 
