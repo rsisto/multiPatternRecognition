@@ -140,3 +140,5 @@ static char *get_buff( char *buf, int n, FILE *fp )
       if( buf[0] != '\n' && buf[0] != '#' ) return(ret);
     }
 }
+
+//TODO: crear funcion que devuelva solo los identificadores del archivo (sin inicializar lo de artoolkit)
