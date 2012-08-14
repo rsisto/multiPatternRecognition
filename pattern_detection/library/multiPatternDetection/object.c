@@ -28,6 +28,73 @@
 
 static char *get_buff( char *buf, int n, FILE *fp );
 
+Id_Object * get_ObjDataIds(char* data_path, char *name)
+{
+  FILE          *fp;
+  Id_Object     *object;
+  char           buf[256], buf1[256] , buf2[256];
+  int            i;
+  int  objectnum   ;
+  
+  strcpy(buf2,data_path);
+  strcat(buf2,"/");
+  strcat(buf2,name);
+  
+  printf("Opening Data File %s\n",buf2);
+
+  if( (fp=fopen(buf2, "r")) == NULL )
+    {
+      printf("Can't find the file - quitting \n");
+      return(0);
+    }
+  
+  get_buff(buf, 256, fp);
+ 
+  if( sscanf(buf, "%d", &objectnum) != 1 )
+    {
+      printf("sscanf  \n");
+      fclose(fp);
+      return(0);
+    }
+
+ 
+
+  object = (Id_Object  *)malloc( sizeof(Id_Object ));
+  if( object == NULL ) { 
+	  printf("no malloc \n");
+	  return(0);
+  }
+//  printf("x3  \n");
+  object->cant_objects = objectnum ;
+//  printf("%d \n",object->cant_objects );
+  for( i = 0; i < objectnum; i++ )
+    {
+      
+	
+      get_buff(buf, 256, fp);
+      if( sscanf(buf, "%s", object->objects[i]) != 1 )
+        {
+          printf("-1  \n");
+          fclose(fp);
+          free(object);
+          return(0);
+        }
+    //  printf("%s \n",object->objects[i]);
+      get_buff(buf, 256, fp);
+      
+      get_buff(buf, 256, fp);
+  
+      get_buff(buf, 256, fp);
+
+    }//fin for
+
+  fclose(fp);
+  
+  return( object );
+}
+
+
+
 ObjectData_T *read_ObjData(char* data_path, char *name, int *objectnum )
 {
   FILE          *fp;

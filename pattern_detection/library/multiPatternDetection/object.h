@@ -14,6 +14,13 @@ typedef struct {
     double     marker_center[2]; // TOOD: find out
 } ObjectData_T;
 
+typedef struct {
+    char       objects[OBJECT_MAX][256]; //name defined in object_data file 
+    int        cant_objects; // cant_object in 
+} Id_Object;
+
+Id_Object *get_ObjDataIds(char* data_path, char *name);
+
 ObjectData_T  *read_ObjData(char* data_path, char *name, int *objectnum );
 
 #endif

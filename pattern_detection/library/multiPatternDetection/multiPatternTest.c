@@ -13,8 +13,20 @@
  
 int main(int argc, char **argv)
 {
+	
+	char objs[] = "";
+	 int j = arMultiGetIdsMarker(NULL,objs ) ;
+	 printf("salio test %d\n", j);
+	int i;
+	
+	 printf("%s \n",&objs);
+	 /*  for( i= 0; objs[ i ] != '\0'; i++) {
+	         printf("%c", objs[ i ]);
+	 }  */
+	  printf("termino test\n");
+	 
   //initialize applications
-  arMultiInit(NULL);
+ /* arMultiInit(NULL);
   printf("PASO Init\n");
   
   char c;
@@ -32,5 +44,5 @@ int main(int argc, char **argv)
 
     }
 
-  return 0;
+  return 0;*/
 }

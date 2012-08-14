@@ -10,6 +10,7 @@
 #include "object.h"
 #include "multiPatternDetection.h"
 
+
 /* Object Data */
 //Path to the Data folder containing object_data and camera_para.dat files
 char *data_path = "Data" ;
@@ -140,6 +141,44 @@ int arMultiIsMarkerPresent(char *id){
     }
     
    
+}
+
+char *MyStrdup( const char *str )
+{
+    char *dup = malloc( strlen( str ) + 1 );
+    return dup ? strcpy( dup, str ) : dup;
+}
+
+int arMultiGetIdsMarker( char* _data_path,char* output){
+	 if((_data_path != NULL)){
+	    data_path = _data_path;
+	  }	
+	 Id_Object * obj =  get_ObjDataIds(data_path,model_name);
+	 if (obj->cant_objects>0){
+		// char out[256*obj->cant_objects];
+		 char out[]="";
+		 char vacio[]="";
+		// printf("salio \n");
+		 int i; 
+		 strcpy(out,"");	 
+		  for(i=0; i< obj->cant_objects;i++){
+			 //printf("%s \n",obj->objects[i]); 
+			 if(strcmp(out,"")!=0){
+				 strcat(out,";");
+			 }
+		 
+			 strcat(out,obj->objects[i]);
+			 //strncpy(out[i],obj->objects[i],256);
+			 //out[i]= MyStrdup(obj->objects[i]);
+			
+		 } 
+		  strcpy(output,out);
+		 // printf("%s \n",out);
+		 return 1;
+	 }else{
+		 return 0;
+	 }
+	  
 }
 
 void arMultiInit( char* _data_path )
