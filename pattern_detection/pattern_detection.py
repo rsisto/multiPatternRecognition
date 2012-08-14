@@ -20,14 +20,11 @@ import os.path
 from gettext import gettext as _
 
 
-
-
 try:
     from sugar.datastore import datastore
 except ImportError:
     pass
-
-from ConfigParser import SafeConfigParser
+ 
 
 plugin_name = 'pattern'
 plugin_folder = 'pattern_detection'
@@ -41,11 +38,13 @@ _logger = logging.getLogger('TurtleArt-activity pattern_detection plugin')
 class Pattern_detection(Plugin):
    #Detection api class
    detection = None
+   block_list= []
+   isInit = False
    
    def __init__(self, parent):
       self._parent = parent
       self._status = False
-
+      self.detection = detectionAPI.detection()
 
    def setup(self):
       SKIN_PATHS.append('plugins/'+plugin_folder+'/images')
@@ -62,60 +61,71 @@ class Pattern_detection(Plugin):
                           help_string= 'Devuelve 1 si la senial esta en el campo visual de la camara')
       self._parent.lc.def_prim('isPresent', 1,
                              lambda self, x: primitive_dictionary['isPresent'](x))
-	     
-      #TODO: obtener identificadores del api y cargar botones con imágenes.	
-      parser = SafeConfigParser()
-      found = parser.read(os.path.abspath('./plugins/'+plugin_folder)+'/signals.ini')
-      print os.path.abspath('./plugins/'+plugin_folder)
-      for section_name in parser.sections():
+	  
+      #Se agregan los IDs de botones para luego chequear que esten para activar la camara
+      self.block_list.append('isPresent')
+         
+      #TODO: Faltaria ver si levnta el objet_data segun el idioma   
+      #obtener identificadores del api y cargar botones con imagenes.	
+      out = self.detection.arMultiGetIdsMarker();
+      
+      for section_name in out.split(";"):
         print 'Signal found:', section_name
-        #image_name= parser.get(section_name, 'imagename')
-        label =  parser.get(section_name, 'bottontext')
-        self._add_signal_botton(palette,section_name,label)
- 
+        self._add_signal_botton(palette,section_name,section_name)
+        self.block_list.append(section_name)
       print '  fin setup'
 
    def stop(self):
       print 'Stop'
+      self._stop_cam()
 
    def quit(self):
-      print 'Quit'
+      self._stop_cam()
 
    def clear(self):
-      print 'Clear'
-      pass
+      self._stop_cam()
    
    def start(self):
-      ''' Initialize the camera if there is an camera block in use '''
-      #TODO: if len(self._parent.block_list.get_similar_blocks('block',
-      #   ['camera', 'read_camera', 'luminance'])) > 0:
-      #   if self._camera is None:
-      #      self._camera = Camera(self._imagepath)
-
+     ''' Initialize the camera if there is an camera block in use '''   
+     if (len(self._parent.block_list.get_similar_blocks('block',self.block_list)) > 0):
+         #hay elementos de la paleta en la pantalla
+         print  "hay botones"
+         if not(self.isInit) :
+           self.detection.init()
+           self.isInit = True
+           print  "Inicializada"
+     
+   def _stop_cam(self):      
+         if self.isInit:
+             self.detection.cleanup()
+             self.isInit = False
+             print  "Apagada"     
+                 
    def _add_signal_botton(self,palette,block_name,label):    
  
-	   palette.add_block(block_name ,
-		                  style='box-style-media',
-		                  label='',
-		                  default=block_name,
-		                  prim_name=block_name,
-	                  	  help_string= label )
-
-	   BLOCKS_WITH_SKIN.append(block_name)
-	   NO_IMPORT.append(block_name)
-	   MEDIA_SHAPES.append(block_name + 'off')
-	   MEDIA_SHAPES.append(block_name + 'small')
-	   EXPAND_SKIN[block_name] = (0, 10)
-	   #if expand > 0:
-           #  EXPAND_SKIN[block_name] = expand
-      	   self._parent.lc.def_prim(block_name , 0, lambda self: block_name)
+    palette.add_block(block_name ,
+                      style='box-style-media',
+                      label='',
+                      default=block_name,
+                      prim_name=block_name,
+                   	  help_string= label )
+    
+    BLOCKS_WITH_SKIN.append(block_name)
+    NO_IMPORT.append(block_name)
+    MEDIA_SHAPES.append(block_name + 'off')
+    MEDIA_SHAPES.append(block_name + 'small')
+    EXPAND_SKIN[block_name] = (0, 10)
+    self._parent.lc.def_prim(block_name , 0, lambda self: block_name)
  
-   #TODO: enganchar métodos de api.
+ 
    def _isPresent(self,valor):
-     print  "el valor del boton "+ valor
-     if valor == 'Hiro':
-     	return True
+     if self.isInit:  
+         print  "el valor del boton "+ valor
+         if self.detection.isMarkerPresent(valor)==1:
+             return True
+         else:
+     	     return False
      else:
-     	return False
+         return False
 
 #### FIN DEL ARCHIVO #####

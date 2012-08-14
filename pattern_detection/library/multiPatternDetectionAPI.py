@@ -13,6 +13,7 @@ import os
 class detection:
   multiPatternLib = None
   video = None
+  OBJECT_MAX = 30
   
   #Init de la clase robot
   def __init__(self, video = "/dev/video0" ):
@@ -38,5 +39,15 @@ class detection:
   def isMarkerPresent(self, marker):
     return self.multiPatternLib.arMultiIsMarkerPresent(marker)
   
-  
-  
+  def arMultiGetIdsMarker(self):
+      data_params = os.path.abspath(os.path.join(os.path.dirname(__file__), 'multiPatternDetection/Data'))
+      s = create_string_buffer('\000'*256*self.OBJECT_MAX)
+       
+      exit = self.multiPatternLib.arMultiGetIdsMarker(data_params,s)
+      if exit:
+          return  s.value 
+      else:
+          return ""
+
+
+       
