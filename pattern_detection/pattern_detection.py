@@ -61,10 +61,20 @@ class Pattern_detection(Plugin):
                           help_string= 'Devuelve 1 si la senial esta en el campo visual de la camara')
       self._parent.lc.def_prim('isPresent', 1,
                              lambda self, x: primitive_dictionary['isPresent'](x))
+      
+      primitive_dictionary['stopCam'] = self._stop_cam
+      palette.add_block('stopCam',
+                          style='basic-style',
+                          label=_('Parar Camara'),
+                          prim_name='stopCam',
+                          help_string= 'Apaga la camara')
+      self._parent.lc.def_prim('stopCam', 0, lambda self :
+            primitive_dictionary['stopCam']())
+      
 	  
       #Se agregan los IDs de botones para luego chequear que esten para activar la camara
       self.block_list.append('isPresent')
-         
+      self.block_list.append('stopCam')   
       #TODO: Faltaria ver si levnta el objet_data segun el idioma   
       #obtener identificadores del api y cargar botones con imagenes.	
       out = self.detection.arMultiGetIdsMarker();

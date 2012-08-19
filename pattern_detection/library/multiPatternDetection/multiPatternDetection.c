@@ -31,6 +31,8 @@ char			*vconf = "";
 char           *cparam_name    = "camera_para.dat";
 ARParam         cparam;
 
+static AR2VideoParamT *gVid = NULL;
+
 /* refresh */
 void arMultiRefresh(void)
 {
@@ -39,16 +41,17 @@ void arMultiRefresh(void)
   ARMarkerInfo    *marker_info;
   int             marker_num;
   int             i,j,k;
-  arVideoCapNext();
+  
+  ar2VideoCapNext(gVid);
    
   /* grab a video frame */
-  if( (dataPtr = (ARUint8 *)arVideoGetImage()) == NULL )
+  if( (dataPtr = (ARUint8 *) ar2VideoGetImage(gVid)) == NULL )
     {
       // arUtilSleep(2);
       printf("arVideGetImage retorno null \n");
       return;
     }
-  printf("dataptr %d %d\n",dataPtr,dataPtr[0]);
+//  printf("dataptr %d %d\n",dataPtr,dataPtr[0]);
   
   if( count == 0 ) arUtilTimerReset();
   count++;
@@ -64,7 +67,7 @@ void arMultiRefresh(void)
     }
   if (marker_num > 0)
     {
-      printf("Detecte %d marcas\n",marker_num);
+     // printf("Detecte %d marcas\n",marker_num);
     }
   /* check for known patterns */
   for( i = 0; i < objectnum; i++ )
@@ -73,7 +76,7 @@ void arMultiRefresh(void)
       k = -1;
       for( j = 0; j < marker_num; j++ )
         {
-           printf("j %d\n",j);
+          // printf("j %d\n",j);
           if( object[i].id == marker_info[j].id)
             {
 
@@ -110,10 +113,11 @@ void arMultiRefresh(void)
         }
       object[i].visible = 1;
       printf("Objeto visible %s\n", object[i].name);
-      printf("Data : %f %f %f\n", object[i].trans[0][3], object[i].trans[1][3], object[i].trans[2][3]);
+    //  printf("Data : %f %f %f\n", object[i].trans[0][3], object[i].trans[1][3], object[i].trans[2][3]);
     }
-  object[0].visible=1;
+  //object[0].visible=1;
   last_refresh = arUtilTimer();
+
 }
 
 ObjectData_T  *arMultiGetObjectData( char *name ){
@@ -187,10 +191,16 @@ void arMultiInit( char* _data_path )
   if(_data_path != NULL){
     data_path = _data_path;
   }
+ 
   /* open the video path */
-  if( arVideoOpen( vconf ) < 0 ) exit(0);
+  gVid = ar2VideoOpen( vconf );
+ if( gVid == NULL ){
+	 printf("problemas con ar2VideoOpen");
+	 exit(0);
+ }
+
   /* find the size of the window */
-  if( arVideoInqSize(&xsize, &ysize) < 0 ) exit(0);
+  ar2VideoInqSize(gVid,&xsize, &ysize);
   printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
 
   /* set the initial camera parameters */
@@ -217,16 +227,73 @@ void arMultiInit( char* _data_path )
       exit(0);
     }
   arUtilTimerReset();
-  arVideoCapStart();
+  ar2VideoCapStart(gVid);
   last_refresh = arUtilTimer();
   
 }
 
 
+/*
+void arMultiInit( char* _data_path )
+{
+  ARParam  wparam;
+  if(_data_path != NULL){
+    data_path = _data_path;
+  }
+  /* open the video path */
+/*  if( arVideoOpen( vconf ) < 0 ) exit(0);
+  /* find the size of the window */
+/*  if( arVideoInqSize(&xsize, &ysize) < 0 ) exit(0);
+  printf("Image size (x,y) = (%d,%d)\n", xsize, ysize);
+
+  /* set the initial camera parameters */
+/*  char camdata_path [strlen(data_path) + strlen(cparam_name) + 10];
+  strcpy(camdata_path,data_path) ; 
+  strcat(camdata_path,"/") ;
+  strcat(camdata_path,cparam_name);
+  printf("path: %s\n",data_path);
+  printf("Camera file: %s\n",camdata_path);
+  if( arParamLoad(camdata_path, 1, &wparam) < 0 )
+    {
+      printf("Camera parameter load error !!\n");
+      exit(0);
+    }
+  arParamChangeSize( &wparam, xsize, ysize, &cparam );
+  arInitCparam( &cparam );
+  printf("*** Camera Parameter ***\n");
+  arParamDisp( &cparam );
+
+  /* load in the object data - trained markers and associated bitmap files */
+/*  if( (object=read_ObjData(data_path,model_name, &objectnum)) == NULL )
+    {
+      printf("Error al leer data obj\n");
+      exit(0);
+    }
+  arUtilTimerReset();
+  arVideoCapStart();
+  last_refresh = arUtilTimer();
+  
+}
+*/
+
 /* cleanup function called when program exits */
 void arMultiCleanup(void)
+{
+	ar2VideoCapStop(gVid);
+	ar2VideoClose(gVid);
+	
+	/*free(gVid->videoBuffer);
+	free(gVid->pipeline);
+	free(gVid->probe);*/
+	free(gVid);	
+	gVid= NULL;
+	
+    argCleanup();
+    printf("fin CleanUP");
+}
+/*void arMultiCleanup(void)
 {
   arVideoCapStop();
   arVideoClose();
   argCleanup();
-}
+}*/
