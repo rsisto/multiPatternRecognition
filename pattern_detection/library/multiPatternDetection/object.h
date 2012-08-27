@@ -15,8 +15,8 @@ typedef struct {
 } ObjectData_T;
 
 typedef struct {
-    char       objects[OBJECT_MAX][256]; //name defined in object_data file 
-    int        cant_objects; // cant_object in 
+    char       objects[OBJECT_MAX][256]; //contains names defined in the object_data file 
+    int        cant_objects; // amount of objects defined in object_data file
 } Id_Object;
 
 Id_Object *get_ObjDataIds(char* data_path, char *name);

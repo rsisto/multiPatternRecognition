@@ -96,20 +96,22 @@ class Pattern_detection(Plugin):
       self._stop_cam()
    
    def start(self):
-     ''' Initialize the camera if there is an camera block in use '''   
-     if (len(self._parent.block_list.get_similar_blocks('block',self.block_list)) > 0):
+     ''' Initialize the camera if there is a camera block in use '''   
+     print("start pdet")
+     if (len(self._parent.block_list.get_similar_blocks('block',['isPresent'])) > 0):
          #hay elementos de la paleta en la pantalla
-         print  "hay botones"
          if not(self.isInit) :
            self.detection.init()
            self.isInit = True
-           print  "Inicializada"
+     
+   def end(self):
+     print("end pdet")
      
    def _stop_cam(self):      
          if self.isInit:
              self.detection.cleanup()
              self.isInit = False
-             print  "Apagada"     
+             print  "Apagar cam"     
                  
    def _add_signal_botton(self,palette,block_name,label):    
  
