@@ -13,6 +13,6 @@ print "Markers: " + str(markers)
 det.init()
 while 1:
   #det.refresh()
-  if det.isMarkerPresent(markers[0]) == 0:
-    print("nada")
+   det.isMarkerPresent(markers[0])
+    
   

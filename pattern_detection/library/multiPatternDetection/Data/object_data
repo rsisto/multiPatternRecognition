@@ -1,20 +1,26 @@
 #Format:
 #** <obj_name>
 #** <obj_pattern filename> relative to this file
-#** <marker_width>
+#** <marker_width> in MM
 #** <centerX centerY>
 
 #the number of patterns to be recognized
-2
+3
 
 #pattern 1
-Hiro
-patt.hiro
-80
+Right
+right.patt
+160
 0,0 0,0
 
 #pattern 2
-Kanji
-patt.kanji
-80
+Shield
+shield.patt
+160
+0,0 0,0
+
+#pattern 3
+NotEnter
+notenter.patt
+160
 0,0 0,0
