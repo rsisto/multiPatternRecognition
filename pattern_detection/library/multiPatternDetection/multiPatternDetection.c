@@ -197,10 +197,12 @@ void arMultiInit( char* _data_path ) {
   arParamDisp( &cparam );
 
   /* load in the object data - trained markers and associated bitmap files */
-  if( (object=read_ObjData(data_path,model_name, &objectnum)) == NULL ) {
-    printf("Error al leer data obj\n");
-    exit(0);
-  }
+  //Only if object is null, else duplicate ids of the same objects will be loaded.
+  if(object==NULL)
+    if( (object=read_ObjData(data_path,model_name, &objectnum)) == NULL ) {
+      printf("Error al leer data obj\n");
+      exit(0);
+    }
   arUtilTimerReset();
   ar2VideoCapStart(gVid);
   last_refresh = arUtilTimer();
