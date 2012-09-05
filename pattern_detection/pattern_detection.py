@@ -50,7 +50,7 @@ class Pattern_detection(Plugin):
       SKIN_PATHS.append('plugins/'+plugin_folder+'/images')
       palette = make_palette(plugin_name,
                      colors=["#00FF00","#008000"],
-                     help_string=_('Esta paleta sigue '))      
+                     help_string=_('Deteccion de marcas'))      
 
       
       primitive_dictionary['isPresent'] = self._isPresent
@@ -58,7 +58,7 @@ class Pattern_detection(Plugin):
                           style='number-style-1arg',
                           label=_('Viendo Senial'),
                           prim_name='isPresent',
-                          help_string= 'Devuelve 1 si la senial esta en el campo visual de la camara')
+                          help_string= 'Devuelve True si la senial esta en el campo visual de la camara')
       self._parent.lc.def_prim('isPresent', 1,
                              lambda self, x: primitive_dictionary['isPresent'](x))
       

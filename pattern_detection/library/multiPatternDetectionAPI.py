@@ -1,6 +1,6 @@
 from ctypes import *
 
-import os
+import sys, os
 
 #Library: multiPatternDetectionAPI
 
@@ -17,10 +17,13 @@ class detection:
   
   #Init de la clase robot
   def __init__(self, video = "/dev/video0" ):
-    #TODO: falta pasar el directorio de Data como parametro. Si no cuando se hace el init la libreria no encuentra.
-    #TODO: pasar video como parametro.
     self.video = video
     os.environ['ARTOOLKIT_CONFIG']= 'v4l2src device='+self.video+' use-fixed-fps=false ! ffmpegcolorspace ! capsfilter caps=video/x-raw-rgb,bpp=24 ! identity name=artoolkit ! fakesink'
+    
+    #Load the libglu.so.3, or else ctypes won't find it if it's not installed in the system
+    glut_location = os.path.abspath(os.path.join(os.path.dirname(__file__), 'lib/libglut.so.3'))
+    cdll.LoadLibrary(glut_location)
+    
     library_location = os.path.abspath(os.path.join(os.path.dirname(__file__), 'multiPatternDetection/libMultiPatternDetection.so'))
     self.multiPatternLib = cdll.LoadLibrary(library_location)
     #Export the ARTOOLKIT_CONFIG system variable which will be used by artoolkit
