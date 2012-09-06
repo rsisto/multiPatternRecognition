@@ -4,23 +4,53 @@
 #** <marker_width> in MM
 #** <centerX centerY>
 
-#the number of patterns to be recognized
-3
+#the number of patterns to be recognized / Cantidad de marcas a ser detectadas (leidos de este mismo archivo en forma secuencial)
+8
 
-#pattern 1
+#Left sign
+Left
+left.patt
+160
+0,0 0,0
+
+#Right sign
 Right
 right.patt
 160
 0,0 0,0
 
-#pattern 2
-Shield
-shield.patt
+#Turn Right sign
+Turnright
+turnright.patt
 160
 0,0 0,0
 
-#pattern 3
+#Turn Left sign
+Turnleft
+turnleft.patt
+160
+0,0 0,0
+
+#Yield sign
+Yield
+yield.patt
+160
+0,0 0,0
+
+#Not Enter Sign
 NotEnter
 notenter.patt
+160
+0,0 0,0
+
+#Round turn sign
+Round
+round.patt
+160
+0,0 0,0
+
+#Stop sign
+Stop
+stop.patt
 160
 0,0 0,0

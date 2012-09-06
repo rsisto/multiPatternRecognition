@@ -97,7 +97,6 @@ class Pattern_detection(Plugin):
    
    def start(self):
      ''' Initialize the camera if there is a camera block in use '''   
-     print("start pdet")
      if (len(self._parent.block_list.get_similar_blocks('block',['isPresent'])) > 0):
          #hay elementos de la paleta en la pantalla
          if not(self.isInit) :
@@ -105,7 +104,7 @@ class Pattern_detection(Plugin):
            self.isInit = True
      
    def end(self):
-     print("end pdet")
+     print("end pattern_detection")
      
    def _stop_cam(self):      
          if self.isInit:
@@ -114,20 +113,31 @@ class Pattern_detection(Plugin):
              print  "Apagar cam"     
                  
    def _add_signal_botton(self,palette,block_name,label):    
- 
-    palette.add_block(block_name ,
+      
+      
+      #If icon exists, use it instead of just the label
+      iconPath = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images/'+block_name+'off.svg'))
+      
+      if os.path.exists(iconPath):
+        palette.add_block(block_name ,
                       style='box-style-media',
                       label='',
                       default=block_name,
                       prim_name=block_name,
                    	  help_string= label )
-    
-    BLOCKS_WITH_SKIN.append(block_name)
-    NO_IMPORT.append(block_name)
-    MEDIA_SHAPES.append(block_name + 'off')
-    MEDIA_SHAPES.append(block_name + 'small')
-    EXPAND_SKIN[block_name] = (0, 10)
-    self._parent.lc.def_prim(block_name , 0, lambda self: block_name)
+        BLOCKS_WITH_SKIN.append(block_name)
+        NO_IMPORT.append(block_name)
+        MEDIA_SHAPES.append(block_name + 'off')
+        MEDIA_SHAPES.append(block_name + 'small')
+        EXPAND_SKIN[block_name] = (0, 10)
+      else:
+        palette.add_block(block_name ,
+                      style='box-style',
+                      label=block_name,
+                      default=block_name,
+                      prim_name=block_name,
+                   	  help_string= label )
+      self._parent.lc.def_prim(block_name , 0, lambda self: block_name)
  
  
    def _isPresent(self,valor):
