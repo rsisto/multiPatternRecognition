@@ -13,6 +13,8 @@ void arMultiRefresh();
 //Return the data for a specified object
 ObjectData_T  *arMultiGetObjectData( char *name );
 
+//int arMultiGetObjectData( char *name );
+
 //Cleanup data and library, release camera
 void arMultiCleanup();
 

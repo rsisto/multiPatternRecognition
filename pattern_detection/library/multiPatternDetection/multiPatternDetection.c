@@ -9,7 +9,7 @@
 #include <AR/video.h>
 #include "object.h"
 #include "multiPatternDetection.h"
-
+#include <assert.h>
 
 /* Object Data */
 //Path to the Data folder containing object_data and camera_para.dat files
@@ -104,30 +104,34 @@ void arMultiRefresh(void) {
   last_refresh = arUtilTimer();
 
 }
-
+ 
 ObjectData_T  *arMultiGetObjectData( char *name ) {
   double now = arUtilTimer();
   if(now-last_refresh > refresh_windows )  {
     //take a new capture
-    //printf("refreshing cam \n");
+   // printf("refreshing cam \n");
     arMultiRefresh();
-  }
+  } 
   int i;
   for( i = 0; i < objectnum; i++ ) {
-    if(strcmp(name, object[i].name)==0) {
+    if(strcmp(name, object[i].name)==0) { 
       return &object[i];
     }
   }
   return NULL;
 }
-
+  
 int arMultiIsMarkerPresent(char *id) {
-  ObjectData_T *objeto = arMultiGetObjectData(id);
+	  
+
+  ObjectData_T *objeto = arMultiGetObjectData(id); 
   if(objeto != NULL) {
-    return  objeto->visible ;
+	  if(objeto->visible == 1)
+		  printf("Obejto coords %d ,%d ,%d \n",objeto->trans[0][3],objeto->trans[1][3],objeto->trans[2][3]); 
+    return  objeto->visible ; 
   } else {
     // dio error
-    //printf("arMultiIsMarkerPresent - undefined id\n");
+    printf("arMultiIsMarkerPresent - undefined id\n");
     return -1;
   }
 
