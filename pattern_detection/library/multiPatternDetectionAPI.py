@@ -26,6 +26,9 @@ class detection:
     
     library_location = os.path.abspath(os.path.join(os.path.dirname(__file__), 'multiPatternDetection/libMultiPatternDetection.so'))
     self.multiPatternLib = cdll.LoadLibrary(library_location)
+    
+    #self.multiPatternLib.arMultiMarkerTrigDist.restype =c_double
+     
     #Export the ARTOOLKIT_CONFIG system variable which will be used by artoolkit
     
   
@@ -41,6 +44,10 @@ class detection:
   
   def isMarkerPresent(self, marker):
     return self.multiPatternLib.arMultiIsMarkerPresent(marker)
+  
+  def getMarkerTrigDist(self, marker):
+    return self.multiPatternLib.arMultiMarkerTrigDist(marker)
+
   
   def arMultiGetIdsMarker(self):
       data_params = os.path.abspath(os.path.join(os.path.dirname(__file__), 'multiPatternDetection/Data'))

@@ -71,10 +71,19 @@ class Pattern_detection(Plugin):
       self._parent.lc.def_prim('stopCam', 0, lambda self :
             primitive_dictionary['stopCam']())
       
+      primitive_dictionary['getMarkerTrigDist'] = self._getMarkerTrigDist
+      palette.add_block('getMarkerTrigDist',
+                          style='number-style-1arg',
+                          label=_('Distancia Senial'),
+                          prim_name='getMarkerTrigDist',
+                          help_string= 'Devuelve la distancia a la camara en mm')
+      self._parent.lc.def_prim('getMarkerTrigDist', 1,
+                             lambda self, x: primitive_dictionary['getMarkerTrigDist'](x))
 	  
       #Se agregan los IDs de botones para luego chequear que esten para activar la camara
       self.block_list.append('isPresent')
-      self.block_list.append('stopCam')   
+      self.block_list.append('stopCam')
+      self.block_list.append('getMarkerTrigDist')     
       #TODO: Faltaria ver si levnta el objet_data segun el idioma   
       #obtener identificadores del api y cargar botones con imagenes.	
       out = self.detection.arMultiGetIdsMarker();
@@ -149,5 +158,7 @@ class Pattern_detection(Plugin):
      	     return False
      else:
          return False
+   def _getMarkerTrigDist(self,valor):
+       return self.detection.getMarkerTrigDist(valor)
 
 #### FIN DEL ARCHIVO #####

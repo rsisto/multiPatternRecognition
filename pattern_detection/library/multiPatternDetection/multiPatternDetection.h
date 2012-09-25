@@ -13,7 +13,8 @@ void arMultiRefresh();
 //Return the data for a specified object
 ObjectData_T  *arMultiGetObjectData( char *name );
 
-//int arMultiGetObjectData( char *name );
+//Return the trigonometric dist sqrt(dx^2 + dy^2 +dz^2)
+int arMultiMarkerTrigDist(char *id);
 
 //Cleanup data and library, release camera
 void arMultiCleanup();
