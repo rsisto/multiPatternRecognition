@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="744.09448819"
+   height="1052.3622047"
+   id="svg3365"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="New document 20">
+  <defs
+     id="defs3367">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective3373" />
+    <inkscape:perspective
+       id="perspective3473"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="1"
+     inkscape:cx="382.99778"
+     inkscape:cy="727.52411"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     showguides="false"
+     inkscape:guide-bbox="true"
+     inkscape:snap-global="true"
+     inkscape:window-width="1440"
+     inkscape:window-height="845"
+     inkscape:window-x="-4"
+     inkscape:window-y="-3"
+     inkscape:window-maximized="1"
+     inkscape:snap-grids="true"
+     inkscape:snap-to-guides="true">
+    <sodipodi:guide
+       orientation="1,0"
+       position="566.92913,566.92913"
+       id="guide3479" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="0,0"
+       id="guide3481" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="0,0"
+       id="guide3483" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="0,566.92913"
+       id="guide3485" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="0,141.73228"
+       id="guide3497" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="0,425.19685"
+       id="guide3499" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="141.73228,0"
+       id="guide3501" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="425.19685,0"
+       id="guide3503" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="-35.433071,0"
+       id="guide3528" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="602.3622,-35.433071"
+       id="guide3530" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="17,0"
+       id="guide3532" />
+    <sodipodi:guide
+       orientation="0,1"
+       position="0,602.3622"
+       id="guide3534" />
+    <sodipodi:guide
+       orientation="1,0"
+       position="602.3622,0"
+       id="guide3536" />
+    <inkscape:grid
+       type="xygrid"
+       id="grid3540"
+       empspacing="5"
+       visible="true"
+       enabled="true"
+       snapvisiblegridlinesonly="true" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata3370">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <image
+       y="157.57588"
+       x="1080"
+       id="image3475"
+       height="566.92914"
+       width="566.92914"
+       xlink:href="file:///home/nico/Descargas/blankPatt.gif" />
+    <g
+       id="g3542"
+       transform="translate(90,-327)">
+      <rect
+         y="485.43304"
+         x="2.7533531e-14"
+         height="566.92914"
+         width="566.92914"
+         id="rect3495"
+         style="fill:#000000" />
+      <rect
+         y="627.16534"
+         x="141.73228"
+         height="283.4646"
+         width="283.46457"
+         id="rect3505"
+         style="fill:#ffffff" />
+      <path
+         id="path3538"
+         d="m -35.433071,1087.7953 637.795271,0 0,-637.79532 -637.795271,0 0,637.79532 z"
+         style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+    </g>
+  </g>
+</svg>
