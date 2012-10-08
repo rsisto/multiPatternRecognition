@@ -13,6 +13,8 @@ print "Markers: " + str(markers)
 det.init()
 while 1:
   #det.refresh()
-   det.isMarkerPresent(markers[0])
+  x = det.getMarkerTrigDist("NotEnter")
+  if x!= -1:
+      print x 
     
   

@@ -101,7 +101,7 @@ void arMultiRefresh(void) {
 
 		}
 		object[i].visible = 1;
-		// printf("Objeto visible %s\n", object[i].name);
+		 printf("Objeto visible %s\n", object[i].name);
 	}
 	last_refresh = arUtilTimer();
 

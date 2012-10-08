@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# archivo prueba.py completo
+# -*- coding: utf-8 -*-
 
 import gtk
 import sys, os
@@ -56,9 +56,9 @@ class Pattern_detection(Plugin):
       primitive_dictionary['isPresent'] = self._isPresent
       palette.add_block('isPresent',
                           style='number-style-1arg',
-                          label=_('Viendo Senial'),
+                          label=_('Viendo Señal'),
                           prim_name='isPresent',
-                          help_string= 'Devuelve True si la senial esta en el campo visual de la camara')
+                          help_string= 'Devuelve True si la señal esta en el campo visual de la camara')
       self._parent.lc.def_prim('isPresent', 1,
                              lambda self, x: primitive_dictionary['isPresent'](x))
       
@@ -74,7 +74,7 @@ class Pattern_detection(Plugin):
       primitive_dictionary['getMarkerTrigDist'] = self._getMarkerTrigDist
       palette.add_block('getMarkerTrigDist',
                           style='number-style-1arg',
-                          label=_('Distancia Senial'),
+                          label=_('Distancia Señal'),
                           prim_name='getMarkerTrigDist',
                           help_string= 'Devuelve la distancia a la camara en mm')
       self._parent.lc.def_prim('getMarkerTrigDist', 1,
