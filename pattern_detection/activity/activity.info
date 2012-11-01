@@ -1,0 +1,6 @@
+[Activity]
+name = pattern_detection
+service_name = uy.fing.pattern_detection_plugin
+exec = sugar-activity pattern_detection.pattern_detection 
+activity_version = 1 
+license = GPLv2+

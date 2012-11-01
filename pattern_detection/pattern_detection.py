@@ -18,7 +18,7 @@ import gtk
 from time import time
 import os.path
 from gettext import gettext as _
-
+from sugar.activity  import activityfactory
 
 try:
     from sugar.datastore import datastore
@@ -32,6 +32,7 @@ plugin_folder = 'pattern_detection'
 sys.path.insert(0, os.path.abspath('./plugins/'+plugin_folder+'/library'))
 
 import multiPatternDetectionAPI as detectionAPI     
+import clase as claseVent
 
 _logger = logging.getLogger('TurtleArt-activity pattern_detection plugin')
 
@@ -58,7 +59,7 @@ class Pattern_detection(Plugin):
                           style='number-style-1arg',
                           label=_('Viendo Señal'),
                           prim_name='isPresent',
-                          help_string= 'Devuelve True si la señal esta en el campo visual de la camara')
+                          help_string= _('Devuelve True si la señal esta en el campo visual de la camara'))
       self._parent.lc.def_prim('isPresent', 1,
                              lambda self, x: primitive_dictionary['isPresent'](x))
       
@@ -67,16 +68,17 @@ class Pattern_detection(Plugin):
                           style='basic-style',
                           label=_('Parar Camara'),
                           prim_name='stopCam',
-                          help_string= 'Apaga la camara')
+                          help_string= _('Apaga la camara'))
       self._parent.lc.def_prim('stopCam', 0, lambda self :
             primitive_dictionary['stopCam']())
+  
       
       primitive_dictionary['getMarkerTrigDist'] = self._getMarkerTrigDist
       palette.add_block('getMarkerTrigDist',
                           style='number-style-1arg',
                           label=_('Distancia Señal'),
                           prim_name='getMarkerTrigDist',
-                          help_string= 'Devuelve la distancia a la camara en mm')
+                          help_string= _('Devuelve la distancia a la camara en mm'))
       self._parent.lc.def_prim('getMarkerTrigDist', 1,
                              lambda self, x: primitive_dictionary['getMarkerTrigDist'](x))
 	  
@@ -86,7 +88,7 @@ class Pattern_detection(Plugin):
       self.block_list.append('getMarkerTrigDist')     
       #TODO: Faltaria ver si levnta el objet_data segun el idioma   
       #obtener identificadores del api y cargar botones con imagenes.	
-      out = self.detection.arMultiGetIdsMarker();
+      out = self.detection.arMultiGetIdsMarker()
       
       for section_name in out.split(";"):
         print 'Signal found:', section_name
@@ -151,7 +153,7 @@ class Pattern_detection(Plugin):
  
    def _isPresent(self,valor):
      if self.isInit:  
-         print  "el valor del boton "+ valor
+         #print  "el valor del boton "+ valor
          if self.detection.isMarkerPresent(valor)==1:
              return True
          else:
@@ -160,5 +162,7 @@ class Pattern_detection(Plugin):
          return False
    def _getMarkerTrigDist(self,valor):
        return self.detection.getMarkerTrigDist(valor)
+   
+
 
 #### FIN DEL ARCHIVO #####

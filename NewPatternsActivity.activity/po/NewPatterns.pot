@@ -1,0 +1,166 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-10-31 22:01-0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: activity/activity.info:2
+msgid "New Patterns"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:52
+msgid "Obtener Patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:59
+msgid "Agregar Marca"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:62
+msgid "Identificador (sin espacios)"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:65
+msgid "Seleccionar archivo .patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:68
+msgid "Seleccionar Icono SVG(opcional)"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:71
+msgid "Tamaño (mm)"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:74
+msgid "Buscar Patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:78
+msgid "Buscar Icono"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:82
+msgid "Aceptar"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:86
+msgid "Limpiar Icono"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:93
+msgid "Quitar Marca"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:104
+msgid "Atención, debe selecionar un identificador de marcas"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:112
+msgid "Atención, el identificador no puede tener espacios"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:122
+msgid "Atención, debes de selcionar un archivo .patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:132
+msgid "Atención, debes seleccionar un tamaño de marca valido"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:149
+msgid ""
+"Atención, ya tienes una marca con ese identificador, ¿deseas sobreescribirla?"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:164
+msgid "Atención, problemas al abrir el archivo de marcas"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:194
+msgid "Atención, problemas al actualizar el archivo de marcas"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:206
+msgid "entro"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:212
+msgid "Marca agregada satisfactoriamente!"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:292
+msgid ""
+"Luego de generados los archivos para imprimir, se deberán generar los "
+"archivos de patrones."
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:293
+msgid "Ir a la siguiente dirección web: "
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:294
+msgid ""
+"http://www.fing.edu.uy/inco/proyectos/butia/mediawiki/index.php/"
+"Generador_de_patrones_para_plugin_Reconocimento_de_marcas "
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:295
+msgid ""
+"Seleccionar el origen de donde se generará el patrón. Seleccionar Camera "
+"Mode. "
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:296
+msgid ""
+"Seleccionar tamaño de patrón, por ejemplo, si el patrón (incluyendo el "
+"recuadro negro) mide 16x16 cm, seleccionar 16x16"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:297
+msgid ""
+"Seleccionar porcentaje del recuadro que representa el patrón. Por ejemplo, "
+"si todo el recuadro mide 16cm y el borde negro mide 2cm, el patrón mide "
+"12x12cm, por lo tanto 75%."
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:298
+msgid ""
+"Una vez que se vea un recuadro rojo alrededor de la marca con el rectángulo "
+"negro, presionar el botón Get Pattern. Aparecerá un recuadro con los "
+"patrones reconocidos, navegar con el botón next al deseado y presionar Save "
+"current. Darle un nombre al archivo en minúsculas, con la extensión .patt, "
+"por ejemplo mimarca.patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:299
+msgid "Ahora puedes pasar a la siguiente pestaña"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:312
+msgid "Archivos .patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:314
+msgid "Cargando archivos .patt"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:321
+msgid "Archivos .svg"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/NewPatternsActivity.activity/ActivityWindows.py:323
+msgid "Cargando archivos .svg"
+msgstr ""

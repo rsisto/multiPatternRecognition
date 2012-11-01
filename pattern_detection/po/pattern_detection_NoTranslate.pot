@@ -1,0 +1,49 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2012-10-17 21:43-0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: activity/activity.info:2
+msgid "pattern_detection"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:54
+msgid "Deteccion de marcas"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:60
+msgid "Viendo Señal"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:62
+msgid "Devuelve True si la señal esta en el campo visual de la camara"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:69
+msgid "Parar Camara"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:71
+msgid "Apaga la camara"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:78
+msgid "Distancia Señal"
+msgstr ""
+
+#: /home/nexo/git_plugin/multiPatternRecognition/pattern_detection/pattern_detection.py:80
+msgid "Devuelve la distancia a la camara en mm"
+msgstr ""
