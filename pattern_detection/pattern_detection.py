@@ -4,35 +4,37 @@
 import gtk
 import sys, os
 import logging
-from gettext import gettext as _
-from plugins.plugin import Plugin
+
 from TurtleArt.tautils import convert
+from plugins.plugin import Plugin
+from TurtleArt.tapalette import make_palette
+from TurtleArt.talogo import primitive_dictionary, logoerror
+from TurtleArt.tapalette import special_block_colors
+from TurtleArt.tautils import convert 
 
 from TurtleArt.tapalette import make_palette, define_logo_function
 from TurtleArt.talogo import primitive_dictionary, logoerror, \
     media_blocks_dictionary
 from TurtleArt.taconstants import MEDIA_SHAPES, NO_IMPORT, SKIN_PATHS, \
     EXPAND_SKIN, BLOCKS_WITH_SKIN 
- 
-import gtk
+
 from time import time
 import os.path
 from gettext import gettext as _
-from sugar.activity  import activityfactory
 
 try:
     from sugar.datastore import datastore
 except ImportError:
+    print "error al importat datastore"
     pass
- 
+
 
 plugin_name = 'pattern'
 plugin_folder = 'pattern_detection'
     
 sys.path.insert(0, os.path.abspath('./plugins/'+plugin_folder+'/library'))
 
-import multiPatternDetectionAPI as detectionAPI     
-import clase as claseVent
+import multiPatternDetectionAPI as detectionAPI
 
 _logger = logging.getLogger('TurtleArt-activity pattern_detection plugin')
 
@@ -42,12 +44,12 @@ class Pattern_detection(Plugin):
    block_list= []
    isInit = False
    
-   def __init__(self, parent):
+   def __init__(self, parent): 
       self._parent = parent
       self._status = False
       self.detection = detectionAPI.detection()
 
-   def setup(self):
+   def setup(self): 
       SKIN_PATHS.append('plugins/'+plugin_folder+'/images')
       palette = make_palette(plugin_name,
                      colors=["#00FF00","#008000"],
